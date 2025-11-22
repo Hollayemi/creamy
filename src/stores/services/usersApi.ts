@@ -1,38 +1,52 @@
 import { BaseResponse } from "../api/types";
 import { baseApi } from "../baseApi";
 import type { User, UserRole } from "../types";
-import { CreateUserInput, UpdateUserInput } from "./types";
+import { UserInfo, CreateUserInput, GetUsersParams, UpdateUserInput, UsersListResponse } from "./types";
+
 
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getUsers: builder.query<User[], { role?: UserRole; department?: string; isActive?: boolean }>({
-      query: (params) => ({
+    // GET /users - List all users with pagination
+    getUsers: builder.query<UsersListResponse, GetUsersParams | void>({
+      query: (params?: GetUsersParams) => ({
         url: "/users",
+        method: "GET",
         params,
       }),
-      providesTags: [{ type: "Users", id: "LIST" }],
+      providesTags: (result) =>
+        result
+          ? [
+            ...result.data.data.map(({ id }) => ({ type: "Users" as const, id })),
+            { type: "Users", id: "LIST" },
+          ]
+          : [{ type: "Users", id: "LIST" }],
     }),
 
-    getUserById: builder.query<User, string>({
-      query: (id) => ({ url: `/users/${id}` }),
+    // GET /users/:id - Get single user by ID
+    getUserById: builder.query<BaseResponse<UserInfo>, number>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "GET",
+      }),
       providesTags: (result, error, id) => [{ type: "Users", id }],
     }),
 
-    createUser: builder.mutation<BaseResponse<User>, FormData>({
+    // POST /users - Create new user
+    createUser: builder.mutation<BaseResponse<UserInfo>, CreateUserInput>({
       query: (body) => ({
         url: "/users",
         method: "POST",
         data: body,
-        isFormData: true,
       }),
       invalidatesTags: [{ type: "Users", id: "LIST" }],
     }),
 
-    updateUser: builder.mutation<User, UpdateUserInput>({
-      query: ({ id, ...body }) => ({
+    // PATCH /users/:id - Update existing user
+    updateUser: builder.mutation<BaseResponse<UserInfo>, { id: number; data: UpdateUserInput }>({
+      query: ({ id, data }) => ({
         url: `/users/${id}`,
-        method: "PUT",
-        body,
+        method: "PATCH",
+        data,
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "Users", id },
@@ -40,11 +54,21 @@ export const usersApi = baseApi.injectEndpoints({
       ],
     }),
 
-    toggleUserStatus: builder.mutation<User, { id: string; isActive: boolean }>({
-      query: ({ id, isActive }) => ({
+    // DELETE /users/:id - Delete user (soft delete)
+    deleteUser: builder.mutation<BaseResponse, number>({
+      query: (id) => ({
+        url: `/users/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Users", id: "LIST" }],
+    }),
+
+    // PATCH /users/:id/status - Toggle user active status
+    toggleUserStatus: builder.mutation<BaseResponse<UserInfo>, { id: number; status: "Active" | "Inactive" }>({
+      query: ({ id, status }) => ({
         url: `/users/${id}/status`,
         method: "PATCH",
-        body: { isActive },
+        data: { status },
       }),
       invalidatesTags: (result, error, { id }) => [
         { type: "Users", id },
@@ -53,7 +77,6 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // ROLES MANAGEMENT
-
     getRoles: builder.query<BaseResponse, void>({
       query: () => ({
         url: "/authorization/roles",
@@ -81,7 +104,6 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // PERMISSIONS MANAGEMENT
-
     getPermissions: builder.query<BaseResponse, void>({
       query: () => ({
         url: "/authorization/permissions",
@@ -109,7 +131,6 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // ROLE-PERMISSION ASSIGNMENT
-
     assignPermissions: builder.mutation<BaseResponse, { role_id: number; permissions: number[] }>({
       query: (body) => ({
         url: "/authorization/assign-permissions",
@@ -135,7 +156,6 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // USER-ROLE ASSIGNMENT
-
     assignRole: builder.mutation<BaseResponse, { user_id: number; role: number[] }>({
       query: (body) => ({
         url: "/authorization/assign-role",
@@ -148,6 +168,8 @@ export const usersApi = baseApi.injectEndpoints({
       ],
     }),
 
+
+
     getUserProfile: builder.query<BaseResponse, void>({
       query: () => ({
         url: "/user-profile",
@@ -155,17 +177,19 @@ export const usersApi = baseApi.injectEndpoints({
       }),
       providesTags: [{ type: "Users", id: "PROFILE" }],
     }),
+  
   }),
 });
 
 export const {
-  // Users
+  // Users CRUD
   useGetUsersQuery,
-  useGetUserProfileQuery,
   useGetUserByIdQuery,
   useCreateUserMutation,
   useUpdateUserMutation,
+  useDeleteUserMutation,
   useToggleUserStatusMutation,
+  useGetUserProfileQuery,
 
   // Roles
   useGetRolesQuery,

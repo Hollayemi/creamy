@@ -1,3 +1,12 @@
+export enum UserRole {
+  INITIATOR = "INITIATOR",
+  CHECKER = "CHECKER",
+  REVIEWER = "REVIEWER",
+  APPROVER = "APPROVER",
+  PROCUREMENT = "PROCUREMENT",
+  FINANCE_ADMIN = "FINANCE_ADMIN",
+  ADMIN = "ADMIN",
+}
 
 export enum RequestStatus {
   PENDING = "PENDING",
@@ -5,6 +14,7 @@ export enum RequestStatus {
   REVIEWED = "REVIEWED",
   APPROVED = "APPROVED",
   IN_PROCUREMENT = "IN_PROCUREMENT",
+  PROCURED = "PROCURED",
   PAYMENT_PENDING = "PAYMENT_PENDING",
   PAID = "PAID",
   REJECTED = "REJECTED",
@@ -17,6 +27,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  role: UserRole;
   department: string;
   phone?: string;
   isActive: boolean;
@@ -24,7 +35,41 @@ export interface User {
   updatedAt: string;
 }
 
+export interface Request {
+  id: string;
+  requestNumber: string;
+  itemName: string;
+  quantity: number;
+  department: string;
+  purpose: string;
+  justification?: string;
+  status: RequestStatus;
+  initiatorId: string;
+  initiator: User;
+  checkerId?: string;
+  checker?: User;
+  reviewerId?: string;
+  reviewer?: User;
+  approverId?: string;
+  approver?: User;
+  documents: Document[];
+  comments: Comment[];
+  auditTrail: AuditLog[];
+  createdAt: string;
+  updatedAt: string;
+}
 
+export interface Document {
+  id: string;
+  requestId: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
+  uploadedBy: string;
+  category: "JUSTIFICATION" | "INVOICE" | "RECEIPT" | "PO" | "OTHER";
+  createdAt: string;
+}
 
 export interface Comment {
   id: string;
