@@ -6,7 +6,7 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQueryWithReauth,
   tagTypes: [
     "Auth",
-    "Departments",
+    "Products",
     "Requests",
     "Approvals",
     "Procurement",

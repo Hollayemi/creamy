@@ -1,39 +1,34 @@
 "use client";
 
-import { Bell, Settings } from "lucide-react";
-
+import { Bell, ChevronDown } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { updateContentLayout, updateNavbarStyle } from "@/lib/layout-utils";
-import { updateThemeMode, updateThemePreset } from "@/lib/theme-utils";
-import { setValueToCookie } from "@/server/server-actions";
-import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
-import type { SidebarVariant, SidebarCollapsible, ContentLayout, NavbarStyle } from "@/types/preferences/layout";
-import { type ThemeMode } from "@/types/preferences/theme";
 
-type LayoutControlsProps = {
-  readonly variant: SidebarVariant;
-  readonly collapsible: SidebarCollapsible;
-  readonly contentLayout: ContentLayout;
-  readonly navbarStyle: NavbarStyle;
-};
+interface Profile {
+  fullName: string;
+  initials: "AD"
+}
 
-export function LayoutControls(props: LayoutControlsProps) {
+export function ProfileCapsule(profile: any) {
 
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button size="icon-lg" className="rounded-full" variant="outline">
-          <Bell size={60} />
-        </Button>
+        <div className="flex items-center justify-between gap-3 border rounded-full p-px">
+          <Avatar className="size-8 rounded-full">
+            <AvatarImage src="" alt={profile?.fullName} />
+            <AvatarFallback className="rounded-full">{profile?.initials}</AvatarFallback>
+          </Avatar>
+          <Button variant="ghost" size="sm" className="flex justify-between ">
+            <ChevronDown />
+          </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent align="end" className="min-h-80">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="text-sm leading-none font-medium">Notification</h4>
+            <h4 className="text-sm leading-none font-medium">Profile</h4>
             {/* <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p> */}
           </div>
           {/* <div className="space-y-3">

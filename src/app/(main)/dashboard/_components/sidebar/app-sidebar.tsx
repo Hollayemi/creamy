@@ -65,9 +65,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="hover:bg-transparent data-[slot=sidebar-menu-button]:!p-1.5">
-              <Link href="/dashboard">
-                <Image src={APP_CONFIG.icon} alt="SON_LOGO" width={40} height={40} />
-                <span className="text-primary! text-base font-bold">{APP_CONFIG.name}</span>
+              <Link href="/dashboard" className="!h-10">
+                <Image src={APP_CONFIG.icon} alt="SON_LOGO" width={80} height={60} />
+                {/* <span className="text-primary! text-base font-bold">{APP_CONFIG.name}</span> */}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -75,12 +75,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent className="hide-sidebar">
         <NavMain items={sidebarItems} />
-        {/* <NavDocuments items={data.documents} /> */}
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter>
+      {/* <SidebarFooter>
         <NavUser user={rootUser} />
-      </SidebarFooter>
+      </SidebarFooter> */}
     </Sidebar>
   );
 }
