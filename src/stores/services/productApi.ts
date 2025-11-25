@@ -1,58 +1,89 @@
 import { baseApi } from "../baseApi";
-import type { Notification } from "../types";
+import type { BaseResponse } from "../api/types";
+import { GetProductsParams, Product, ProductsListResponse, UpdateStockInput } from "@/types/product";
 
-export const notificationsApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    createProduct: builder.mutation<Notification[], { isRead?: boolean; limit?: number }>({
-        query: (params) => ({
-        method: "POST",
-        url: "/products",
-        params,
-      }),
-    //   providesTags: [{ type: "Products" }],
-    }),
 
-    getUnreadCount: builder.query<{ count: number }, void>({
-      query: () => ({ url: "/notifications/unread-count" }),
-      providesTags: [{ type: "Notifications", id: "COUNT" }],
-    }),
 
-    markAsRead: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/notifications/${id}/read`,
-        method: "PATCH",
-      }),
-      invalidatesTags: [
-        { type: "Notifications", id: "LIST" },
-        { type: "Notifications", id: "COUNT" },
-      ],
-    }),
+export const productApi = baseApi.injectEndpoints({
+    endpoints: (builder) => ({
+        // GET /product - List all products with pagination
+        getProducts: builder.query<ProductsListResponse, GetProductsParams | undefined>({
+            query: (params) => ({
+                url: "/product",
+                method: "GET",
+                params: params || undefined,
+            }),
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.data.products.map(({ _id }) => ({ type: "Products" as const, id: _id })),
+                        { type: "Products", id: "LIST" },
+                    ]
+                    : [{ type: "Products", id: "LIST" }],
+        }),
 
-    markAllAsRead: builder.mutation<void, void>({
-      query: () => ({
-        url: "/notifications/read-all",
-        method: "PATCH",
-      }),
-      invalidatesTags: [
-        { type: "Notifications", id: "LIST" },
-        { type: "Notifications", id: "COUNT" },
-      ],
-    }),
+        // GET /product/:id - Get single product by ID
+        getProduct: builder.query<BaseResponse<Product>, number>({
+            query: (id) => ({
+                url: `/product/${id}`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: "Products", id }],
+        }),
 
-    deleteNotification: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `/notifications/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: [{ type: "Notifications", id: "LIST" }],
+        // POST /product - Create new product
+        createProduct: builder.mutation<BaseResponse<Product>, any>({
+            query: (data) => ({
+                url: "/product",
+                method: "POST",
+                data,
+            }),
+            invalidatesTags: [{ type: "Products", id: "LIST" }],
+        }),
+
+        // PUT /product/:id - Update existing product
+        updateProduct: builder.mutation<BaseResponse<Product>, { id: number; data: FormData }>({
+            query: ({ id, data }) => ({
+                url: `/product/${id}`,
+                method: "PUT",
+                data,
+                isFormData: true,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Products", id },
+                { type: "Products", id: "LIST" },
+            ],
+        }),
+
+        // DELETE /product/:id - Delete product
+        deleteProduct: builder.mutation<BaseResponse, number>({
+            query: (id) => ({
+                url: `/product/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [{ type: "Products", id: "LIST" }],
+        }),
+
+        // PATCH /product/:id/stock - Update product stock
+        updateStock: builder.mutation<BaseResponse<Product>, { id: number; data: UpdateStockInput }>({
+            query: ({ id, data }) => ({
+                url: `/product/${id}/stock`,
+                method: "PATCH",
+                data,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Products", id },
+                { type: "Products", id: "LIST" },
+            ],
+        }),
     }),
-  }),
 });
 
 export const {
-  useCreateProductMutation,
-  useGetUnreadCountQuery,
-  useMarkAsReadMutation,
-  useMarkAllAsReadMutation,
-  useDeleteNotificationMutation,
-} = notificationsApi;
+    useGetProductsQuery,
+    useGetProductQuery,
+    useCreateProductMutation,
+    useUpdateProductMutation,
+    useDeleteProductMutation,
+    useUpdateStockMutation,
+} = productApi;

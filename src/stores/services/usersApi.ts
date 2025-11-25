@@ -1,6 +1,5 @@
-import { BaseResponse } from "../api/types";
+import { BaseResponse, User } from "../api/types";
 import { baseApi } from "../baseApi";
-import type { User, UserRole } from "../types";
 import { UserInfo, CreateUserInput, GetUsersParams, UpdateUserInput, UsersListResponse } from "./types";
 
 
@@ -170,14 +169,14 @@ export const usersApi = baseApi.injectEndpoints({
 
 
 
-    getUserProfile: builder.query<BaseResponse, void>({
+    getUserProfile: builder.query<User, void>({
       query: () => ({
-        url: "/user-profile",
+        url: "/auth/me",
         method: "GET",
       }),
       providesTags: [{ type: "Users", id: "PROFILE" }],
     }),
-  
+
   }),
 });
 

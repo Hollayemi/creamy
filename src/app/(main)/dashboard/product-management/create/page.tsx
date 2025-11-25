@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MultiSelect } from "@/components/ui/select-multiple";
 import { z } from "zod";
+import { useCreateProductMutation } from "@/stores/services/productApi";
 
 // Zod Validation Schema
 const productVariantSchema = z.object({
@@ -37,7 +38,7 @@ const productSchema = z.object({
   sku: z.string().min(1, "SKU is required"),
   brand: z.string().optional(),
   category: z.string().min(1, "Category is required"),
-  status: z.enum(["Active", "Inactive"]),
+  status: z.enum(['active', 'inactive', 'draft']),
   description: z.string().min(10, "Description must be at least 10 characters"),
   salesPrice: z.string().min(1, "Sales price is required"),
   unitType: z.string().min(1, "Unit type is required"),
@@ -80,19 +81,24 @@ export default function AddNewProductPage() {
   const [sku, setSku] = useState("PF-GPS-500G-001");
   const [brand, setBrand] = useState("Golden Penny");
   const [category, setCategory] = useState("Packaged Foods");
-  const [status, setStatus] = useState<"Active" | "Inactive">("Active");
+  const [status, setStatus] = useState<"active" | "inactive" | "draft">("active");
   const [description, setDescription] = useState(
     "Golden Penny Spaghetti (500g) is a premium-quality pasta made from 100% pure durum wheat semolina, crafted to deliver the perfect texture and taste every time."
   );
   const [salesPrice, setSalesPrice] = useState("5,200");
-  const [unitType, setUnitType] = useState("Carton");
+  const [unitType, setUnitType] = useState("carton");
   const [unitQuantity, setUnitQuantity] = useState("1 x 500g");
   const [stockQuantity, setStockQuantity] = useState("1,500");
   const [tags, setTags] = useState(["pasta", "grocery", "golden penny"]);
   const [newTag, setNewTag] = useState("");
   const [stockAlert, setStockAlert] = useState("5");
   const [images, setImages] = useState<ImagePreview[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProductHandler, { isLoading: isSubmitting }] = useCreateProductMutation()
+
+  const categories = ['Packaged Foods', 'Beverages', 'Fresh Produce', 'Dairy', 'Meat & Seafood',
+    'Bakery', 'Snacks', 'Household', 'Personal Care', 'Other']
+
+  const unitTypes = ['single', 'pack', 'carton', 'kg', 'litre', 'box']
 
   const [variants, setVariants] = useState<ProductVariant[]>([
     {
@@ -100,7 +106,7 @@ export default function AddNewProductPage() {
       sku: "GP-SPG-CTN",
       productId: "PROD-000241",
       salesPrice: "36,500",
-      unitType: "Carton",
+      unitType: "carton",
       unitQuantity: "20 x 500g",
       stockQuantity: "20",
     },
@@ -194,10 +200,10 @@ export default function AddNewProductPage() {
     setSku("");
     setBrand("");
     setCategory("");
-    setStatus("Active");
+    setStatus("active");
     setDescription("");
     setSalesPrice("");
-    setUnitType("Carton");
+    setUnitType("carton");
     setUnitQuantity("");
     setStockQuantity("");
     setTags([]);
@@ -227,7 +233,7 @@ export default function AddNewProductPage() {
         sku: sku,
         brand: brand || undefined,
         category: category,
-        status: status,
+        status: uploadType === 'draft' ? uploadType : status,
         description: description,
         salesPrice: salesPrice,
         unitType: unitType,
@@ -267,9 +273,9 @@ export default function AddNewProductPage() {
 
   const handleSaveDraft = async () => {
     const payload = buildPayload("draft");
+    console.log({ payload })
     if (!payload) return;
 
-    setIsSubmitting(true);
     try {
       // Create FormData for file upload
       const formData = new FormData();
@@ -283,12 +289,8 @@ export default function AddNewProductPage() {
       formData.append("data", JSON.stringify(payload));
       formData.append("upload_type", "draft");
 
-      // TODO: Replace with your actual API endpoint
-      // const response = await fetch("/api/products/draft", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      // const result = await response.json();
+
+      uploadProductHandler(payload).then((res) => console.log(res))
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success("Product saved as draft");
@@ -296,7 +298,6 @@ export default function AddNewProductPage() {
       toast.error("Failed to save draft");
       console.error(error);
     } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -304,7 +305,6 @@ export default function AddNewProductPage() {
     const payload = buildPayload("publish");
     if (!payload) return;
 
-    setIsSubmitting(true);
     try {
       const formData = new FormData();
 
@@ -315,21 +315,15 @@ export default function AddNewProductPage() {
       formData.append("data", JSON.stringify(payload));
       formData.append("upload_type", "publish");
 
-      // TODO: Replace with your actual API endpoint
-      // const response = await fetch("/api/products/publish", {
-      //   method: "POST",
-      //   body: formData,
-      // });
-      // const result = await response.json();
+      await uploadProductHandler(payload).then((res) => console.log(res))
 
       await new Promise((resolve) => setTimeout(resolve, 1000));
       toast.success("Product published successfully");
-      router.push("/dashboard/products");
+      // router.push("/dashboard/products");
     } catch (error) {
       toast.error("Failed to publish product");
       console.error(error);
     } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -419,21 +413,22 @@ export default function AddNewProductPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Packaged Foods">Packaged Foods</SelectItem>
-                          <SelectItem value="Beverages">Beverages</SelectItem>
-                          <SelectItem value="Household">Household</SelectItem>
+                          {categories.map((e, i) =>
+                            <SelectItem key={i} value={e}>{e}</SelectItem>
+                          )}
+
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="status">Status</Label>
-                      <Select value={status} onValueChange={(v) => setStatus(v as "Active" | "Inactive")}>
+                      <Select value={status} onValueChange={(v) => setStatus(v as "active" | "inactive")}>
                         <SelectTrigger className="w-full h-11! bg-muted" id="status">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -474,8 +469,9 @@ export default function AddNewProductPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Single">Single</SelectItem>
-                          <SelectItem value="Carton">Carton</SelectItem>
+                          {unitTypes.map((e, i) =>
+                            <SelectItem key={i} value={e}>{e}</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -663,8 +659,9 @@ export default function AddNewProductPage() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Carton">Carton</SelectItem>
-                              <SelectItem value="Single">Single</SelectItem>
+                              {unitTypes.map((e, i) =>
+                                <SelectItem key={i} value={e}>{e}</SelectItem>
+                              )}
                             </SelectContent>
                           </Select>
                         </div>

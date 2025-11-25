@@ -5,7 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 
 export const server =
-  process.env.NODE_ENV === "production" ? "https://corislo-backend.onrender.com" : "http://localhost:5001";
+  process.env.NODE_ENV === "production" ? "https://" : "http://localhost:5001";
 
 export interface RequestConfig {
   url: string;

@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { users } from "@/data/users";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
 import {
@@ -26,10 +25,12 @@ import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 import { ProfileCapsule } from "./_components/sidebar/profile";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
+import Welcome from "./_components/sidebar/welocome";
 
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
 
   const [sidebarVariant, sidebarCollapsible, contentLayout, navbarStyle] = await Promise.all([
     getPreference<SidebarVariant>("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
@@ -67,17 +68,9 @@ export default async function Layout({ children }: Readonly<{ children: ReactNod
             <div className="flex items-center gap-1 lg:gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mx-2 data-[orientation=vertical]:h-4" />
-              <div className="flex items-center gap-4">
 
-                <div>
-                  <p className="text-base !font-bold text-foreground">
-                    Good Morning, Jonathan 👋
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Here's what's happening with your store today
-                  </p>
-                </div>
-              </div>
+              <Welcome />
+             
               {/* <SearchDialog /> */}
             </div>
             <div className="flex items-center gap-2">
