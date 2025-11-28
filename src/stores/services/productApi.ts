@@ -1,6 +1,6 @@
 import { baseApi } from "../baseApi";
 import type { BaseResponse } from "../api/types";
-import { GetProductsParams, Product, ProductsListResponse, UpdateStockInput } from "@/types/product";
+import { GetProductsParams, movementHistory, Product, ProductPreviewResponse, ProductsListResponse, StockHistoryItem, UpdateStockInput } from "@/types/product";
 
 
 
@@ -23,7 +23,7 @@ export const productApi = baseApi.injectEndpoints({
         }),
 
         // GET /product/:id - Get single product by ID
-        getProduct: builder.query<BaseResponse<Product>, number>({
+        getProduct: builder.query<BaseResponse<Product>, string>({
             query: (id) => ({
                 url: `/product/${id}`,
                 method: "GET",
@@ -39,6 +39,22 @@ export const productApi = baseApi.injectEndpoints({
                 data,
             }),
             invalidatesTags: [{ type: "Products", id: "LIST" }],
+        }),
+
+        getProductPreview: builder.query<BaseResponse<ProductPreviewResponse>, string>({
+            query: (id) => ({
+                url: `/product/${id}/preview`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: "Products", id: `${id}-preview` }],
+        }),
+
+        getProductMovementHistory: builder.query<BaseResponse<movementHistory[]>, string>({
+            query: (id) => ({
+                url: `/product/${id}/stock-history`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: "Products", id: `${id}-preview` }],
         }),
 
         // PUT /product/:id - Update existing product
@@ -83,6 +99,8 @@ export const {
     useGetProductsQuery,
     useGetProductQuery,
     useCreateProductMutation,
+    useGetProductPreviewQuery,
+    useGetProductMovementHistoryQuery,
     useUpdateProductMutation,
     useDeleteProductMutation,
     useUpdateStockMutation,

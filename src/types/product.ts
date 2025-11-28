@@ -102,3 +102,112 @@ export interface ProductsListResponse {
         products: Product[];
     };
 }
+
+
+// Product Preview Types
+export interface ProductPreview {
+    _id: string;
+    productId: string;
+    sku: string;
+    productName: string;
+    brand?: string;
+    category: string;
+    description: string;
+    images: string[];
+    status: "active" | "inactive";
+    tags: string[];
+    salesPrice: number;
+    unitType: string;
+    unitQuantity: string;
+    stockQuantity: number;
+    totalStock: number;
+    minimumStockAlert: number;
+    stockStatus: string;
+    variants: ProductVariant[];
+    createdBy: {
+        _id: string;
+        name: string;
+        email: string;
+    };
+    updatedBy: any;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProductVariant {
+    _id: string;
+    sku: string;
+    productId: string;
+    salesPrice: number;
+    unitType: string;
+    unitQuantity: string;
+    stockQuantity: number;
+    images: string[];
+}
+
+export interface ProductAnalytics {
+    totalSales: number;
+    totalQuantitySold: number;
+    totalOrders: number;
+    percentageChange: number;
+    salesTrend: Array<{
+        month: string;
+        revenue: number;
+        quantity: number;
+    }>;
+}
+
+export interface ProductPricing {
+    salesPrice: number;
+    costPerItem: number;
+    profit: number;
+    grossMargin: number;
+}
+
+export interface RegionInventory {
+    region: string;
+    currentStock: number;
+    lastRestocked: string;
+    manager: string;
+    status: "Stable" | "Low Stock" | "Out of Stock" | "Balanced";
+    variants: Array<{
+        variantId: string;
+        variantName: string;
+        quantity: number;
+    }>;
+}
+
+export interface StockHistoryItem {
+    date: string;
+    action: string;
+    quantity: number;
+    orderNumber: string;
+    orderStatus: string;
+}
+
+export interface ProductInventory {
+    byRegion: RegionInventory[];
+    stockHistory: StockHistoryItem[];
+}
+
+export interface movementHistory {
+    history: StockHistoryItem[];
+    pagination: any
+}
+
+export interface ProductOverview {
+    sku: string;
+    category: string;
+    stockLevel: string;
+    weightQuantity: string;
+    availabilityStatus: string;
+    tags: string[];
+}
+
+export interface ProductPreviewResponse {
+    product: ProductPreview;
+    analytics: ProductAnalytics;
+    pricing: ProductPricing;
+    inventory: ProductInventory;
+    overview: ProductOverview;
+}
