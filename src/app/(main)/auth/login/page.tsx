@@ -33,22 +33,33 @@ export default function LoginPage() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!phoneNumber || !password) {
-      toast.error("Please enter both phone number and password");
+    if (!email || !password) {
+      toast.error("Please enter both email and password");
       return;
     }
     try {
-      const response = await login({
-        phoneNumber,
+      await login({
+        email,
         password
-      }).unwrap();
+      }).unwrap().then((response) => {
       setTempToken(response?.data?.otp);
       setPhoneNumber(response?.data?.phoneNumber);
-      setStep("otp");
-      toast.success(`OTP sent to ${response.data?.phoneNumber}`);
+      router.push('/dashboard');
+      toast.success("Login successful!");
+      if (response.data?.user) {
+        dispatch(
+          setCredentials({
+            user: response.data.user,
+            token: response.data.token ?? "",
+          })
+        );
+      }
+      })
+      // setStep("otp");
+      // toast.success(`OTP sent to ${response.data?.phoneNumber}`);
 
     } catch (error: any) {
-      toast.error(error?.data?.message || "Invalid phone number or password");
+      toast.error(error?.data?.message || "Invalid email or password");
     }
   };
 
@@ -148,11 +159,11 @@ export default function LoginPage() {
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                   <Input
-                    id="phone"
-                    type="number"
-                    placeholder="Enter your phone n"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="h-12 pl-11"
                     disabled={isLoading}
                     required

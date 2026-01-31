@@ -285,7 +285,7 @@ export default function ProductsListPage() {
                                     {product.productName}
                                 </TableCell>
                                 <TableCell className="">{product.sku}</TableCell>
-                                <TableCell className="">{product.category}</TableCell>
+                                <TableCell className="">{product.category.name}</TableCell>
                                 <TableCell className="font-medium">
                                     {product.salesPrice.toLocaleString()}
                                 </TableCell>

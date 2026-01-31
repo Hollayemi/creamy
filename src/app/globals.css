@@ -56,6 +56,7 @@ These serve as the fallback; there is no separate default.css file. */
   --popover-foreground: oklch(0.145 0 0);
   --primary: #5B2D90;
   --primary-foreground: oklch(0.985 0 0);
+  --primary-btn-foreground: oklch(0.985 0 0);;
   --secondary: #e3bc5c;
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -92,6 +93,7 @@ These serve as the fallback; there is no separate default.css file. */
   --popover-foreground: oklch(0.985 0 0);
   --primary: #5B2D90;
   --primary-foreground: oklch(0.205 0 0);
+  --primary-btn-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);

@@ -17,13 +17,19 @@ export interface createdByType {
     email: string;
 }
 
+export interface Category {
+    name: string;
+    _id: string;
+
+}
+
 export interface Product {
     _id: string;
     productName: string;
     productId: string;
     sku: string;
     brand: string;
-    category: string;
+    category: Category;
     status: "active" | "inactive";
     description: string;
     tags: string[];

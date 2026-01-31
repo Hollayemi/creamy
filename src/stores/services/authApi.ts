@@ -60,7 +60,7 @@ export const authApi = baseApi.injectEndpoints({
     // Main login endpoint - handles both admin (password) and regular user (OTP) login
     login: builder.mutation<LoginResponseWithOTP, LoginOtpRequest>({
       query: (credentials) => ({
-        url: "/auth/login",
+        url: "/staff/login",
         method: "POST",
         data: credentials,
         sendToken: false,
@@ -166,7 +166,7 @@ export const authApi = baseApi.injectEndpoints({
 
     getCurrentUser: builder.query<User, void>({
       query: () => ({
-        url: "/auth/me",
+        url: "/staff/one",
         method: "GET",
       }),
       providesTags: ["Auth"],

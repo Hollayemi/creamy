@@ -6,9 +6,18 @@ export const baseApi = createApi({
   baseQuery: fetchBaseQueryWithReauth,
   tagTypes: [
     "Auth",
+    "Users",
     "Products",
     "Coupons",
     "Authorization",
+    "Categories",
+    "Regions",
+    "Deals",
+    "Adverts",
+    "Staff",
+        "Roles",
+        "Permissions",
+        "ActivityLogs",
   ],
   endpoints: () => ({}),
 });

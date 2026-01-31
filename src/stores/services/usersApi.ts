@@ -171,7 +171,7 @@ export const usersApi = baseApi.injectEndpoints({
 
     getUserProfile: builder.query<User, void>({
       query: () => ({
-        url: "/auth/me",
+        url: "/staff/one",
         method: "GET",
       }),
       providesTags: [{ type: "Users", id: "PROFILE" }],

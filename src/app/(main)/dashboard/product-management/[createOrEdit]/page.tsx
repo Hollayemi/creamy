@@ -14,6 +14,12 @@ import { toast } from "sonner";
 import { MultiSelect } from "@/components/ui/select-multiple";
 import { z } from "zod";
 import { useCreateProductMutation, useGetProductQuery, useUpdateProductMutation } from "@/stores/services/productApi";
+import {
+  useGetCategoriesQuery,
+  type Category,
+} from "@/stores/services/settingsApi";
+import { CategoriesRegionResponse } from "@/types/config";
+import { useGetRegionsQuery } from "@/stores/services/config";
 
 // Zod Validation Schema
 const productVariantSchema = z.object({
@@ -104,20 +110,20 @@ export default function AddNewProductPage({ searchParams }: any) {
   
   const [uploadProductHandler, { isLoading: isSubmitting }] = useCreateProductMutation()
   const [updateProductHandler, { isLoading: isUpdating }] = useUpdateProductMutation()
+      const { data: defaultRegions, isLoading: regionLoading } = useGetRegionsQuery({})
+
+  const { data: categoriesResponse, isLoading } = useGetCategoriesQuery();
+    const availableRegions: CategoriesRegionResponse[] = Array.isArray(defaultRegions?.data) ? defaultRegions.data : []
+    const categories = categoriesResponse?.data?.map((e) => ({ label: e.name, value: e.id })) || [];
 
   // Fetch existing product data
   const { data: productData, isLoading: isFetching, isError: fetchError } = useGetProductQuery(mySearchParams?.id, {
     skip: !mySearchParams?.id || showing !== "edit",
   });
 
-  const categories = ['Packaged Foods', 'Beverages', 'Fresh Produce', 'Dairy', 'Meat & Seafood',
-    'Bakery', 'Snacks', 'Household', 'Personal Care', 'Other']
-
+  // const categories = categories.ma
   const unitTypes = ['single', 'pack', 'carton', 'kg', 'litre', 'box']
-
   const [variants, setVariants] = useState<ProductVariant[]>([]);
-
-  const availableRegions = ["Surulere", "Ikeja", "Yaba", "Lekki-Ajah", "Agege"];
   const [regions, setRegions] = useState<RegionStock[]>([]);
 
   const handleAddTag = () => {
@@ -138,7 +144,7 @@ export default function AddNewProductPage({ searchParams }: any) {
       setProductId(fetched.productId);
       setDescription(fetched.description);
       setBrand(fetched.brand);
-      setCategory(fetched.category);
+      setCategory(fetched.category._id);
       setStatus(fetched.status);
       setStockQuantity(fetched.stockQuantity?.toString());
       setSku(fetched.sku);
@@ -501,7 +507,7 @@ export default function AddNewProductPage({ searchParams }: any) {
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((e, i) =>
-                            <SelectItem key={i} value={e}>{e}</SelectItem>
+                            <SelectItem key={i} value={e.value || ""}>{e.label}</SelectItem>
                           )}
                         </SelectContent>
                       </Select>
@@ -588,7 +594,7 @@ export default function AddNewProductPage({ searchParams }: any) {
                     <div className="space-y-2">
                       <Label htmlFor="Regions">Inventory Region</Label>
                       <MultiSelect
-                        options={availableRegions.map((each: string) => ({ value: each, label: each }))}
+                        options={availableRegions.map((each) => ({ value: each.id, label: each.displayName }))}
                         value={regions.map((each) => each.region)}
                         customOnchange={(value: string) =>
                           setRegions((prev) => {
@@ -625,7 +631,7 @@ export default function AddNewProductPage({ searchParams }: any) {
                   <div className="flex gap-2 flex-wrap">
                     {regions.map((tag) => (
                       <Badge key={tag.region} variant="outline" className="gap-1">
-                        {tag.region}
+                        {availableRegions.find(r => r.id === tag.region)?.displayName || tag.region}
                         <button
                           onClick={() => setRegions((prev) => prev.filter((r) => r.region !== tag.region))}
                           className="ml-1 hover:text-destructive"
