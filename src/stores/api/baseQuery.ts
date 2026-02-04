@@ -3,7 +3,7 @@
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import { toast } from "sonner";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://gokart-foht.onrender.com/api/v1"; //|| "http://localhost:5000/api/v1";
 
 export type RequestConfig = {
   url: string;

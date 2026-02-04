@@ -8,6 +8,8 @@ export type BaseResponse<T = any> = {
 export type User = {
   id: string,
   name: string,
+  fullname: string,
+  permission: [string],
   email: string,
   phoneNumber: string,
   role: string,

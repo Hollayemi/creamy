@@ -1,5 +1,6 @@
 import { baseApi } from "../baseApi";
 import type { BaseResponse } from "../api/types";
+import { Product } from "@/types/product";
 
 // Types
 export interface Category {
@@ -26,7 +27,7 @@ export interface DealOfTheDay {
   _id: string;
   productId: string;
   productName?: string;
-  discountPercentage: number;
+  percentage: number;
   startDate: string;
   endDate: string;
   status: "active" | "inactive";
@@ -124,9 +125,9 @@ export const settingsApi = baseApi.injectEndpoints({
     }),
 
     // ============ DEALS OF THE DAY ============
-    getDeals: builder.query<BaseResponse<DealOfTheDay[]>, void>({
+    getDeals: builder.query<BaseResponse<{ deals: Product[], count: number }>, void>({
       query: () => ({
-        url: "/deals",
+        url: "/product/deals/deals-of-the-day",
         method: "GET",
       }),
       providesTags: ["Deals"],
@@ -134,10 +135,10 @@ export const settingsApi = baseApi.injectEndpoints({
 
     createDeal: builder.mutation<
       BaseResponse<DealOfTheDay>,
-      { productId: string; discountPercentage: number; startDate: string; endDate: string }
+      { productId: string; percentage: number; startDate: string; endDate: string }
     >({
       query: (data) => ({
-        url: "/deals",
+        url: "/product/deals-of-the-day",
         method: "POST",
         data,
       }),
@@ -146,7 +147,7 @@ export const settingsApi = baseApi.injectEndpoints({
 
     updateDeal: builder.mutation<
       BaseResponse<DealOfTheDay>,
-      { id: string; data: { productId: string; discountPercentage: number; startDate: string; endDate: string } }
+      { id: string; data: { productId: string; percentage: number; startDate: string; endDate: string } }
     >({
       query: ({ id, data }) => ({
         url: `/deals/${id}`,
@@ -158,7 +159,7 @@ export const settingsApi = baseApi.injectEndpoints({
 
     deleteDeal: builder.mutation<BaseResponse, string>({
       query: (id) => ({
-        url: `/deals/${id}`,
+        url: `/products/${id}/deals`,
         method: "DELETE",
       }),
       invalidatesTags: ["Deals"],

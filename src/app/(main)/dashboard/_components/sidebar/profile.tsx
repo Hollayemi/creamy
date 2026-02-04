@@ -4,6 +4,7 @@ import { Bell, ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useGetCurrentUserQuery } from "@/stores/services/authApi";
 
 interface Profile {
   fullName: string;
@@ -11,7 +12,7 @@ interface Profile {
 }
 
 export function ProfileCapsule(profile: any) {
-
+ const { data: currentUser } = useGetCurrentUserQuery()
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -29,7 +30,7 @@ export function ProfileCapsule(profile: any) {
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
             <h4 className="text-sm leading-none font-medium">Profile</h4>
-            {/* <p className="text-muted-foreground text-xs">Customize your dashboard layout preferences.</p> */}
+            <p className="text-muted-foreground text-xs">{currentUser?.fullname}</p>
           </div>
           {/* <div className="space-y-3">
             <div className="space-y-1">

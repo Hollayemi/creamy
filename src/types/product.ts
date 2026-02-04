@@ -33,6 +33,12 @@ export interface Product {
     status: "active" | "inactive";
     description: string;
     tags: string[];
+    dealInfo?: {
+        percentage: number;
+        startDate: string;
+        endDate: string;
+        status: "active" | "inactive";
+    };
     images: string[];
     salesPrice: number;
     unitType: string;

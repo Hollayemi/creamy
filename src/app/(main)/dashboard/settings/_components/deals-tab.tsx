@@ -48,35 +48,44 @@ import {
   useDeleteDealMutation,
   type DealOfTheDay,
 } from "@/stores/services/settingsApi";
+import { useGetProductsQuery } from "@/stores/services/productApi";
+import { Product } from "@/types/product";
 
+interface IDSelect {
+  value: string;
+  label: string
+}
 export default function DealsTab() {
   const { data: dealsResponse, isLoading } = useGetDealsQuery();
+  const { data: products, isLoading: isProductsLoading } = useGetProductsQuery({ search: "" })
   const [createDeal, { isLoading: isCreating }] = useCreateDealMutation();
   const [updateDeal, { isLoading: isUpdating }] = useUpdateDealMutation();
   const [deleteDeal, { isLoading: isDeleting }] = useDeleteDealMutation();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingDeal, setEditingDeal] = useState<DealOfTheDay | null>(null);
+  const [editingDeal, setEditingDeal] = useState<Product | null>(null);
   const [deletingDealId, setDeletingDealId] = useState<string | null>(null);
 
   // Form state
   const [productId, setProductId] = useState("");
-  const [discountPercentage, setDiscountPercentage] = useState("");
+  const [percentage, setDiscountPercentage] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState<"active" | "inactive">("active");
+  const [applicableProduct, setApplicableProduct] = useState<IDSelect[]>([]);
 
-  const deals = dealsResponse?.data || [];
+  const deals = dealsResponse?.data?.deals || [];
+  const availableProducts = products?.data?.products || []
 
-  const handleOpenDialog = (deal?: DealOfTheDay) => {
+  const handleOpenDialog = (deal?: Product) => {
     if (deal) {
       setEditingDeal(deal);
-      setProductId(deal.productId);
-      setDiscountPercentage(deal.discountPercentage.toString());
-      setStartDate(deal.startDate.split("T")[0]);
-      setEndDate(deal.endDate.split("T")[0]);
-      setStatus(deal.status);
+      setProductId(deal._id);
+      setDiscountPercentage(deal.dealInfo?.percentage.toString() || "");
+      setStartDate(deal.dealInfo?.startDate.split("T")[0] || "");
+      setEndDate(deal.dealInfo?.endDate.split("T")[0] || "");
+      setStatus(deal.dealInfo?.status || "inactive");
     } else {
       resetForm();
     }
@@ -99,7 +108,7 @@ export default function DealsTab() {
       return;
     }
 
-    const discount = parseFloat(discountPercentage);
+    const discount = parseFloat(percentage);
     if (isNaN(discount) || discount <= 0 || discount > 100) {
       toast.error("Discount must be between 1 and 100");
       return;
@@ -123,7 +132,7 @@ export default function DealsTab() {
     try {
       const data = {
         productId: productId.trim(),
-        discountPercentage: discount,
+        percentage: discount,
         startDate,
         endDate,
       };
@@ -200,7 +209,7 @@ export default function DealsTab() {
                 </TableCell>
               </TableRow>
             ) : (
-              deals.map((deal) => (
+              deals.map((deal: Product) => (
                 <TableRow key={deal._id}>
                   <TableCell className="font-mono text-sm">{deal.productId}</TableCell>
                   <TableCell>{deal.productName || "N/A"}</TableCell>
@@ -210,20 +219,26 @@ export default function DealsTab() {
                         <Percent className="w-5 h-5 text-green-600" />
                       </div>
                       <span className="font-semibold text-green-600">
-                        {deal.discountPercentage}% OFF
+                        {deal.dealInfo?.percentage ?? "N/A"}% OFF
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {format(new Date(deal.startDate), "MMM dd")} -{" "}
-                      {format(new Date(deal.endDate), "MMM dd, yyyy")}
+                      {deal.dealInfo ? (
+                        <>
+                          {format(new Date(deal.dealInfo.startDate), "MMM dd")} -{" "}
+                          {format(new Date(deal.dealInfo.endDate), "MMM dd, yyyy")}
+                        </>
+                      ) : (
+                        "N/A"
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={deal.status === "active" ? "default" : "secondary"}>
-                      {deal.status}
+                    <Badge variant={deal?.dealInfo?.status === "active" ? "default" : "secondary"}>
+                      {deal.dealInfo?.status || "inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -260,26 +275,32 @@ export default function DealsTab() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="productId">Product ID *</Label>
-              <Input
-                id="productId"
-                value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                placeholder="e.g., 507f1f77bcf86cd799439011"
-              />
+              <Select value={productId} onValueChange={(value: string) => setProductId(value)}>
+                <SelectTrigger id="productId" className="bg-gray-50 w-full dark:bg-gray-900">
+                  <SelectValue placeholder="Select a product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableProducts.map((product) => (
+                    <SelectItem key={product._id} value={product._id}>
+                      {product.productName}
+                  </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground">
                 Enter the MongoDB ObjectId of the product
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="discountPercentage">Discount Percentage *</Label>
+              <Label htmlFor="percentage">Discount Percentage *</Label>
               <div className="relative">
                 <Input
-                  id="discountPercentage"
+                  id="percentage"
                   type="number"
                   min="1"
                   max="100"
-                  value={discountPercentage}
+                  value={percentage}
                   onChange={(e) => setDiscountPercentage(e.target.value)}
                   placeholder="e.g., 25"
                 />

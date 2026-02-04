@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Settings, FolderTree, MapPin, Zap, Megaphone } from "lucide-react";
+import { Settings, FolderTree, MapPin, Zap, Megaphone, Bell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CategoriesTab from "./_components/categories-tab";
 import RegionsTab from "./_components/regions-tab";
 import DealsTab from "./_components/deals-tab";
 import AdvertsTab from "./_components/adverts-tab";
+import PushNotificationsTab from "./_components/push-notifications-tab";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("categories");
@@ -31,7 +32,7 @@ export default function SettingsPage() {
       <Card>
         <CardContent className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid h-12 w-full grid-cols-4 lg:w-auto lg:inline-grid">
+            <TabsList className="grid h-12 w-full grid-cols-5 lg:w-auto lg:inline-grid">
               <TabsTrigger value="categories" className="gap-2">
                 <FolderTree className="h-4 w-4" />
                 <span className="hidden sm:inline">Categories</span>
@@ -47,6 +48,10 @@ export default function SettingsPage() {
               <TabsTrigger value="adverts" className="gap-2">
                 <Megaphone className="h-4 w-4" />
                 <span className="hidden sm:inline">Adverts</span>
+              </TabsTrigger>
+               <TabsTrigger value="notifications">
+                <Bell className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Push Notifications</span>
               </TabsTrigger>
             </TabsList>
 
@@ -64,6 +69,10 @@ export default function SettingsPage() {
 
             <TabsContent value="adverts" className="space-y-4">
               <AdvertsTab />
+            </TabsContent>
+
+             <TabsContent value="notifications">
+              <PushNotificationsTab />
             </TabsContent>
           </Tabs>
         </CardContent>

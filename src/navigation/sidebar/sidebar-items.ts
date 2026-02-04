@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LucideIcon, LogOut, Moon } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, LucideIcon, LogOut, Moon, Car } from "lucide-react";
 
 export interface NavSubItem {
   title: string;
@@ -64,18 +64,30 @@ export const sidebarItems: NavGroup[] = [
   },
   {
     id: 1,
-    label: "Others",
+    label: "Accounts",
     items: [
+       {
+        title: "Staff Management",
+        url: "/dashboard/staff-management",
+        icon: Users,
+
+      },
+       {
+        title: "Driver Management",
+        url: "/dashboard/driver-management",
+        icon: Car
+
+      },
+       {
+        title: "Customer Management",
+        url: "/dashboard/customer-management",
+        icon: Users,
+
+      },
       {
         title: "Enable Dark Mode",
         url: "/dashboard",
         icon: Moon,
-      },
-      {
-        title: "User Management",
-        url: "/dashboard/products",
-        icon: Users,
-
       },
       {
         title: "Log Out",
