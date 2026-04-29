@@ -158,12 +158,12 @@ export const fetchBaseQueryWithReauth: BaseQueryFn<RequestConfig, unknown, BaseE
     });
 
     // If 401, clear auth data and redirect to login
-    if (response.status === 401) {
-      clearAuthData();
-      if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
-      }
-    }
+    // if (response.status === 401) {
+    //   clearAuthData();
+    //   if (typeof window !== "undefined") {
+    //     window.location.href = "/auth/login";
+    //   }
+    // }
 
     return {
       error: {

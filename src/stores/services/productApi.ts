@@ -99,6 +99,39 @@ export const productApi = baseApi.injectEndpoints({
         { type: "Products", id: "LIST" },
       ],
     }),
+
+    // ── CSV Import / Export ────────────────────────────────────────────────────
+
+    // GET /product/import/template — download blank CSV template
+    downloadImportTemplate: builder.mutation<void, void>({
+      query: () => ({
+        url: "/product/import/template",
+        method: "GET",
+      }),
+    }),
+
+    // POST /product/import — upload CSV file (field name must be "file")
+    importProductsFromCsv: builder.mutation<
+      BaseResponse<{ imported: number; failed: number; errors?: string[] }>,
+      FormData
+    >({
+      query: (formData) => ({
+        url: "/product/import",
+        method: "POST",
+        data: formData,
+        isFormData: true,
+      }),
+      invalidatesTags: [{ type: "Products", id: "LIST" }],
+    }),
+
+    // GET /product/export — export current catalogue to CSV
+    exportProductsToCsv: builder.mutation<void, GetProductsParams | undefined>({
+      query: (params) => ({
+        url: "/product/all/export",
+        method: "GET",
+        params: params || undefined,
+      }),
+    }),
   }),
 });
 
@@ -111,4 +144,7 @@ export const {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useUpdateStockMutation,
+  useDownloadImportTemplateMutation,
+  useImportProductsFromCsvMutation,
+  useExportProductsToCsvMutation,
 } = productApi;

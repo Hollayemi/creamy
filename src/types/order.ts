@@ -4,11 +4,13 @@ export interface OrderItem {
   name: string;
   quantity: number;
   price: number;
+  image: string;
 }
 
 export interface TimelineItem {
   time: string;
   event: string;
+  note: string;
 }
 
 export interface Order {

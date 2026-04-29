@@ -305,8 +305,7 @@ export default function DriverManagementPage() {
                         <AvatarFallback>{getInitials(driver.fullName)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{driver.fullName}</p>
-                        {!driver.hasSetPassword && <span className="text-xs text-orange-600">Password not set</span>}
+                        <p className="font-medium">{driver.userId.name}</p>
                       </div>
                     </div>
                   </TableCell>

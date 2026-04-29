@@ -35,8 +35,8 @@ export default function CancelOrderDialog({
   const canConfirm = reason.trim() !== "" && note.trim() !== "" && password.trim() !== "";
 
   return (
-    <div className="fixed inset-0 z-50 flex w-96 translate-x-100 items-center justify-center overflow-hidden bg-black/50">
-      <div className="relative w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-900">
+    <div className="fixed inset-0 z-50 flex w-96 translate-x-170 items-center bg-transparent justify-center overflow-hidden  pointer-events-none">
+      <div className="relative w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl dark:bg-gray-900 pointer-events-auto shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b bg-gray-900 p-6 dark:bg-gray-800">
           <div className="flex items-center gap-3">

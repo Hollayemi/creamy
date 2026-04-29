@@ -40,3 +40,22 @@ export function formatCurrency(
 
   return new Intl.NumberFormat(locale, formatOptions).format(amount);
 }
+
+
+
+export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions) {
+  const parsedDate = typeof date === "string" ? new Date(date) : date;
+
+  if (isNaN(parsedDate.getTime())) {
+    console.warn(`Invalid date provided to formatDate: ${date}`);
+    return "Invalid Date";
+  }
+
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  };
+
+  return new Intl.DateTimeFormat("en-US", { ...defaultOptions, ...options }).format(parsedDate);
+}

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ColumnDef } from "@tanstack/react-table";
 import {
   Eye,
   Pencil,
@@ -10,11 +9,12 @@ import {
   Search,
   Filter,
   Download,
+  Upload,
   Calendar,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Loader,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,46 +24,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useDeleteProductMutation, useGetProductsQuery } from "@/stores/services/productApi";
-
-// Mock data matching your screenshot
+import ProductImportExportDialog from "./_components/product-import-export-dialog";
 
 // Stats data
 const stats = [
-  {
-    label: "Total Products",
-    value: "4265",
-    change: "1.7% vs last month",
-    changeType: "increase",
-    color: "purple",
-  },
-  {
-    label: "In Stock",
-    value: "4141",
-    change: "1.2% vs last month",
-    changeType: "increase",
-    color: "orange",
-  },
-  {
-    label: "Low Stock",
-    value: "85",
-    change: "4.5% vs last month",
-    changeType: "increase",
-    color: "cyan",
-  },
-  {
-    label: "Out of Stock",
-    value: "124",
-    change: "24% vs last month",
-    changeType: "increase",
-    color: "red",
-  },
-  {
-    label: "Categories",
-    value: "12",
-    change: "- vs last month",
-    changeType: "neutral",
-    color: "blue",
-  },
+  { label: "Total Products", value: "4265", change: "1.7% vs last month", changeType: "increase", color: "purple" },
+  { label: "In Stock", value: "4141", change: "1.2% vs last month", changeType: "increase", color: "orange" },
+  { label: "Low Stock", value: "85", change: "4.5% vs last month", changeType: "increase", color: "cyan" },
+  { label: "Out of Stock", value: "124", change: "24% vs last month", changeType: "increase", color: "red" },
+  { label: "Categories", value: "12", change: "- vs last month", changeType: "neutral", color: "blue" },
 ];
 
 export default function ProductsListPage() {
@@ -75,6 +44,7 @@ export default function ProductsListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
   const [currentRow, setCurrentRow] = useState<string>("");
+  const [importExportOpen, setImportExportOpen] = useState(false);
 
   const [handleDelete, { isLoading: deleting }] = useDeleteProductMutation();
   const { data, isLoading } = useGetProductsQuery({ page: currentPage, status: selectedStatus, search: searchQuery });
@@ -87,9 +57,7 @@ export default function ProductsListPage() {
       "Low Stock": { bg: "bg-orange-100", text: "text-orange-700" },
       "Out of Stock": { bg: "bg-red-100", text: "text-red-700" },
     };
-
     const variant = variants[status] || variants.Active;
-
     return (
       <span className={cn("inline-flex rounded-md px-2.5 py-1 text-xs font-medium", variant.bg, variant.text)}>
         {status}
@@ -113,7 +81,7 @@ export default function ProductsListPage() {
 
   const deleteHandler = (id: string) => {
     setCurrentRow(id);
-    handleDelete(id + "ds").then((e) => console.log(e));
+    handleDelete(id).then((e) => console.log(e));
   };
 
   return (
@@ -124,10 +92,15 @@ export default function ProductsListPage() {
           <h1 className="dark:text-primary text-2xl font-semibold text-gray-900">Products List</h1>
           <p className="mt-1 text-sm text-gray-500">Manage all products available across dark stores and regions</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-muted text-muted-foreground h-9 gap-2">
-            <Download className="h-4 w-4" />
-            Export
+        <div className="flex items-center gap-2">
+          {/* Import / Export button */}
+          <Button
+            variant="outline"
+            className="bg-muted text-muted-foreground h-9 gap-2"
+            onClick={() => setImportExportOpen(true)}
+          >
+            <Upload className="h-4 w-4" />
+            Import / Export
           </Button>
           <Button
             className="bg-primary h-9 gap-2 text-white"
@@ -200,8 +173,12 @@ export default function ProductsListPage() {
           Filter
         </Button>
 
-        <Button variant="outline" className="border-muted bg-muted text-muted-foreground h-10 gap-2">
-          <Download className="h-4 w-4" />
+        <Button
+          variant="outline"
+          className="border-muted bg-muted text-muted-foreground h-10 gap-2"
+          onClick={() => setImportExportOpen(true)}
+        >
+          <FileDown className="h-4 w-4" />
           Export
         </Button>
       </div>
@@ -225,50 +202,65 @@ export default function ProductsListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow key={product._id} className="hover:bg-gray-50">
-                <TableCell>
-                  <Checkbox
-                    checked={selectedRows.includes(product._id)}
-                    onCheckedChange={() => toggleRowSelection(product._id)}
-                  />
-                </TableCell>
-                <TableCell className="font-medium">{product.productName}</TableCell>
-                <TableCell className="">{product.sku}</TableCell>
-                <TableCell className="">{product.category.name}</TableCell>
-                <TableCell className="font-medium">{product.salesPrice.toLocaleString()}</TableCell>
-                <TableCell className="">{product.stockQuantity}</TableCell>
-                <TableCell className="">{product?.minimumStockAlert || 0}</TableCell>
-                <TableCell>{getStatusBadge(product.status)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => goTo(`/dashboard/product-management/preview?id=${product._id}`)}
-                      className="rounded-full p-1.5 text-purple-600 hover:bg-purple-50"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => goTo(`/dashboard/product-management/edit?id=${product._id}`)}
-                      className="rounded-full p-1.5 text-orange-600 hover:bg-orange-50"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteHandler(product._id)}
-                      className="rounded-full p-1.5 text-red-600 hover:bg-red-50"
-                    >
-                      {deleting && currentRow === product._id ? (
-                        <Loader size={15} className="spin text-red-500" />
-                      ) : (
-                        <Trash2 className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell colSpan={9}>
+                    <div className="h-10 animate-pulse rounded bg-gray-100"></div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                  No products found.
                 </TableCell>
               </TableRow>
-            ))}
-            {/* </TableRow> */}
+            ) : (
+              products.map((product) => (
+                <TableRow key={product._id} className="hover:bg-gray-50">
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedRows.includes(product._id)}
+                      onCheckedChange={() => toggleRowSelection(product._id)}
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{product.productName}</TableCell>
+                  <TableCell className="">{product.sku}</TableCell>
+                  <TableCell className="">{product.category.name}</TableCell>
+                  <TableCell className="font-medium">{product.salesPrice.toLocaleString()}</TableCell>
+                  <TableCell className="">{product.stockQuantity}</TableCell>
+                  <TableCell className="">{product?.minimumStockAlert || 0}</TableCell>
+                  <TableCell>{getStatusBadge(product.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => goTo(`/dashboard/product-management/preview?id=${product._id}`)}
+                        className="rounded-full p-1.5 text-purple-600 hover:bg-purple-50"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => goTo(`/dashboard/product-management/edit?id=${product._id}`)}
+                        className="rounded-full p-1.5 text-orange-600 hover:bg-orange-50"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteHandler(product._id)}
+                        className="rounded-full p-1.5 text-red-600 hover:bg-red-50"
+                      >
+                        {deleting && currentRow === product._id ? (
+                          <Loader className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
 
@@ -301,23 +293,20 @@ export default function ProductsListPage() {
             </Button>
 
             <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(
-                  "h-8 w-8 border-gray-300",
-                  currentPage === 1 && "border-purple-600 bg-purple-50 text-purple-600",
-                )}
-                onClick={() => setCurrentPage(1)}
-              >
-                1
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 border-gray-300" onClick={() => setCurrentPage(2)}>
-                2
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 border-gray-300" onClick={() => setCurrentPage(3)}>
-                3
-              </Button>
+              {[1, 2, 3].map((page) => (
+                <Button
+                  key={page}
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "h-8 w-8 border-gray-300",
+                    currentPage === page && "border-purple-600 bg-purple-50 text-purple-600",
+                  )}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </Button>
+              ))}
               <span className="px-2 text-sm text-gray-500">...</span>
             </div>
 
@@ -333,6 +322,13 @@ export default function ProductsListPage() {
           </div>
         </div>
       </div>
+
+      {/* Import / Export Dialog */}
+      <ProductImportExportDialog
+        open={importExportOpen}
+        onOpenChange={setImportExportOpen}
+        exportParams={{ search: searchQuery, status: selectedStatus !== "all" ? selectedStatus : undefined }}
+      />
     </div>
   );
 }

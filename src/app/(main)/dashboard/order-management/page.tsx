@@ -210,6 +210,7 @@ export default function OrdersListPage() {
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { bg: string; text: string }> = {
       Pending: { bg: "bg-yellow-100", text: "text-yellow-700" },
+      paid: { bg: "bg-green-100", text: "text-green-700" },
       Processing: { bg: "bg-blue-100", text: "text-blue-700" },
       "En-Route": { bg: "bg-purple-100", text: "text-purple-700" },
       Delivered: { bg: "bg-green-100", text: "text-green-700" },
@@ -344,6 +345,7 @@ export default function OrdersListPage() {
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="processing">Processing</SelectItem>
             <SelectItem value="shipped">En-Route</SelectItem>
             <SelectItem value="delivered">Delivered</SelectItem>

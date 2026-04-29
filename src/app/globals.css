@@ -46,6 +46,17 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+::-webkit-scrollbar {
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5b2d90;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 /* Default theme styles (used when no data-theme-preset is set or when 'default' is selected).
 These serve as the fallback; there is no separate default.css file. */

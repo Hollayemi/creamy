@@ -50,6 +50,8 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
 
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState<string | null>(null);
+  const [vehiclePhoto, setVehiclePhoto] = useState<File | null>(null);
+  const [vehiclePhotoPreview, setVehiclePhotoPreview] = useState<string | null>(null);
   const [driversLicense, setDriversLicense] = useState<File | null>(null);
   const [driversLicensePreview, setDriversLicensePreview] = useState<string | null>(null);
 
@@ -81,12 +83,14 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
       });
       setProfilePhoto(null);
       setProfilePhotoPreview(null);
+      setVehiclePhoto(null);
+      setVehiclePhotoPreview(null);
       setDriversLicense(null);
       setDriversLicensePreview(null);
     }
   }, [open]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: "profile" | "license") => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>, type: "profile" | "license" | "vehicle") => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -105,6 +109,10 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
       if (type === "profile") {
         setProfilePhoto(file);
         setProfilePhotoPreview(reader.result as string);
+      }
+      else if(type ==="vehicle"){
+        setVehiclePhoto(file);
+        setVehiclePhotoPreview(reader.result as string);
       } else {
         setDriversLicense(file);
         setDriversLicensePreview(reader.result as string);
@@ -113,10 +121,13 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
     reader.readAsDataURL(file);
   };
 
-  const removeImage = (type: "profile" | "license") => {
+  const removeImage = (type: "profile" | "license" | "vehicle") => {
     if (type === "profile") {
       setProfilePhoto(null);
       setProfilePhotoPreview(null);
+    } else if(type === "vehicle"){
+      setVehiclePhoto(null);
+      setVehiclePhotoPreview(null);
     } else {
       setDriversLicense(null);
       setDriversLicensePreview(null);
@@ -230,12 +241,15 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
       if (profilePhoto) {
         submitFormData.append("profilePhoto", profilePhoto);
       }
+      if (vehiclePhoto) {
+        submitFormData.append("vehiclePhoto", vehiclePhoto);
+      }
       if (driversLicense) {
         submitFormData.append("driversLicense", driversLicense);
       }
 
       await createDriver(submitFormData).unwrap();
-      toast.success("Driver onboarded successfully. Password setup link sent to email.");
+      toast.success("Driver onboarded successfully.");
       onOpenChange(false);
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to onboard driver");
@@ -290,7 +304,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="driver@example.com"
                     />
-                    <p className="text-muted-foreground text-xs">Password setup link will be sent here</p>
+                    {/* <p className="text-muted-foreground text-xs">Password setup link will be sent here</p> */}
                   </div>
 
                   <div className="space-y-2">
@@ -487,6 +501,39 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                       </label>
                     )}
                   </div>
+
+                   <div className="col-span-2 space-y-2">
+                    <Label>Vehicle Photo</Label>
+                    {vehiclePhotoPreview ? (
+                      <div className="relative h-48 w-full">
+                        <img
+                          src={vehiclePhotoPreview}
+                          alt="vehicle"
+                          className="h-full w-full rounded-lg border object-contain"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={() => removeImage("vehicle")}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:bg-gray-50">
+                        <Upload className="mb-2 h-8 w-8 text-gray-400" />
+                        <span className="text-sm text-gray-500">Upload driver&apos;slicense</span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => handleImageChange(e, "vehicle")}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -582,13 +629,13 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                 </div>
               </div>
 
-              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+              {/* <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
                 <p className="text-sm text-blue-800">
                   <strong>Note:</strong> After registration, a password setup link will be sent to{" "}
                   <strong>{formData.email || "the driver&apos;semail"}</strong>. The driver must set their password before
                   they can access the system.
                 </p>
-              </div>
+              </div> */}
 
               <div className="flex justify-end gap-2 border-t pt-4">
                 <Button variant="outline" onClick={handleBack}>
