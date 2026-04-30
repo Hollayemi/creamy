@@ -7,10 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, formatDate } from "@/lib/utils";
 import CancelOrderDialog from "./cancel-order-dialog";
 import UpdateStatusDialog from "./update-status-dialog";
+import AssignDriverDialog from "./assign-driver-dialog";
 import { useState } from "react";
-import { 
-  useCancelOrderMutation, 
-  useUpdateOrderStatusMutation 
+import {
+  useCancelOrderMutation,
+  useUpdateOrderStatusMutation
 } from "@/stores/services/orderApi";
 import type { Order } from "@/types/order";
 import { toast } from "sonner";
@@ -35,15 +36,16 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   'refunded': { label: 'Refunded', color: 'bg-gray-100 text-gray-800' },
 };
 
-export default function OrderDetailsDialog({ 
-  order, 
-  isOpen, 
+export default function OrderDetailsDialog({
+  order,
+  isOpen,
   onClose,
-  onStatusUpdate 
+  onStatusUpdate
 }: OrderDetailsDialogProps) {
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
-  
+  const [isAssignDriverOpen, setIsAssignDriverOpen] = useState(false);
+
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
   const [updateOrderStatus, { isLoading: isUpdatingStatus }] = useUpdateOrderStatusMutation();
 
@@ -73,10 +75,10 @@ export default function OrderDetailsDialog({
         orderNumber: order.orderId,
         data: { status, note },
       }).unwrap();
-      
+
       const statusConfig = STATUS_CONFIG[status];
       toast.success(`Order ${statusConfig?.label || status} successfully`);
-      
+
       setIsUpdateStatusOpen(false);
       onStatusUpdate?.();
       onClose();
@@ -110,12 +112,12 @@ export default function OrderDetailsDialog({
   };
 
   const initials = getInitials(order.customerName);
-  
+
   const currentStatusConfig = STATUS_CONFIG[order.status] || STATUS_CONFIG['Pending'];
 
   return (
     <>
-      <div className="fixed left-68 inset-0 z-50 flex w-96 items-center justify-center pointer-events-none">
+      <div className="fixed left-68 inset-0 z-50 flex w-[410px] items-center justify-center pointer-events-none">
         <div className="relative max-h-[90vh] w-full max-w-3xl  rounded-lg bg-white shadow-xl dark:bg-gray-900 pointer-events-auto">
           {/* Header */}
           <div className="flex items-center justify-between border-b bg-gray-900 p-6 dark:bg-gray-800">
@@ -186,12 +188,12 @@ export default function OrderDetailsDialog({
                 <div className="space-y-4">
                   {order.orderedItems.map((item, index) => (
                     <div key={index} className="flex items-start gap-4 rounded-lg border p-4">
-                      <img 
-                        src={item.image} 
-                        width={900} 
-                        height={900} 
-                        alt={item.name} 
-                        className="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-200 object-cover" 
+                      <img
+                        src={item.image}
+                        width={900}
+                        height={900}
+                        alt={item.name}
+                        className="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-200 object-cover"
                       />
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900 dark:text-white">{item.name}</h4>
@@ -264,7 +266,7 @@ export default function OrderDetailsDialog({
             {!isCancelled && (
               <>
                 {canAccept ? (
-                  <Button 
+                  <Button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                     onClick={handleAccept}
                     disabled={isUpdatingStatus}
@@ -273,14 +275,17 @@ export default function OrderDetailsDialog({
                     Accept Order
                   </Button>
                 ) : canUpdate ? (
-                  <Button 
+                  <Button
                     className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
                     onClick={() => setIsUpdateStatusOpen(true)}
                   >
                     Update Status
                   </Button>
                 ) : null}
-                
+                <Button onClick={() => setIsAssignDriverOpen(true)}>
+                  Assign Driver
+                </Button>
+
                 <Button
                   variant="outline"
                   className="flex-1 border-red-300 bg-red-100 text-red-700 hover:bg-red-200 hover:text-red-800"
@@ -291,7 +296,7 @@ export default function OrderDetailsDialog({
                 </Button>
               </>
             )}
-            
+
             {isCancelled && (
               <Button
                 variant="outline"
@@ -304,7 +309,7 @@ export default function OrderDetailsDialog({
           </div>
         </div>
       </div>
-      
+
       <CancelOrderDialog
         isOpen={isCancelOpen}
         onClose={() => setIsCancelOpen(false)}
@@ -318,6 +323,13 @@ export default function OrderDetailsDialog({
         onConfirm={handleStatusUpdate}
         currentStatus={order.status}
         isSubmitting={isUpdatingStatus}
+      />
+
+      <AssignDriverDialog
+        isOpen={isAssignDriverOpen}
+        onClose={() => setIsAssignDriverOpen(false)}
+        orderNumber={order.orderId}
+        onSuccess={onStatusUpdate}
       />
     </>
   );

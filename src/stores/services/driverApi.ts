@@ -1,5 +1,23 @@
 import { baseApi } from "../baseApi";
 import type { BaseResponse } from "../api/types";
+import { CategoriesRegionResponse } from "@/types/config";
+
+export interface AvailableDriver {
+  _id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  vehicleType: string;
+  vehiclePlateNumber: string;
+  vehicleModel?: string;
+  region: string;
+  rating: number;
+  totalDeliveries: number;
+  completedDeliveries: number;
+  isOnline: boolean;
+  status: string;
+}
 
 // Types
 export interface Driver {
@@ -15,50 +33,37 @@ export interface Driver {
   address: string;
   city: string;
   state: string;
-  // Vehicle Information
   vehicleType: "motorcycle" | "bicycle" | "car" | "van" | "truck";
   vehicleModel?: string;
   vehiclePlateNumber: string;
   vehicleColor?: string;
-
-  // Personal Information
   emergencyContact?: {
     name: string;
     phone: string;
     relationship: string;
   };
-  // Documents
   driversLicense?: string;
   licenseNumber?: string;
   licenseExpiry?: string;
   profilePhoto?: string;
-
-  // Work Information
   region: string;
   assignedBranch?: string;
   employmentType: "full-time" | "part-time" | "contract";
-
-  // Status & Activity
   status: "active" | "suspended" | "disabled" | "pending" | "on-delivery";
   verificationStatus: "pending" | "verified" | "rejected";
   isOnline?: boolean;
-
-  // Account Setup
   hasSetPassword: boolean;
   passwordSetupToken?: string;
   passwordSetupExpiry?: string;
-
-  // Dates
   joinedDate: string;
   lastActive?: string;
   createdAt: string;
   updatedAt: string;
-
-  // Statistics (optional, from backend)
   totalDeliveries?: number;
   completedDeliveries?: number;
   rating?: number;
 }
+
 export interface AllDriversResponse {
   drivers: Driver[];
   pagination: {
@@ -85,33 +90,22 @@ export interface DriverActivityLog {
 }
 
 export interface CreateDriverInput {
-  // Basic Information
   fullName: string;
   email: string;
   phone: string;
-
-  // Vehicle Information
   vehicleType: "motorcycle" | "bicycle" | "car" | "van" | "truck";
   vehicleModel?: string;
   vehiclePlateNumber: string;
   vehicleColor?: string;
-
-  // Personal Information
   address: string;
   city: string;
   state: string;
   dateOfBirth?: string;
-
-  // Emergency Contact
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   emergencyContactRelationship?: string;
-
-  // Documents
   licenseNumber?: string;
   licenseExpiry?: string;
-
-  // Work Information
   region: string;
   assignedBranch?: string;
   employmentType: "full-time" | "part-time" | "contract";
@@ -137,7 +131,7 @@ export interface UpdateDriverInput {
 
 export interface SuspendDriverInput {
   reason: string;
-  duration?: number; // in days
+  duration?: number;
   notifyDriver?: boolean;
 }
 
@@ -146,7 +140,6 @@ export interface DisableDriverInput {
   notifyDriver?: boolean;
 }
 
-// Types
 export interface PickupLocation {
   address: string;
   lat: number;
@@ -165,38 +158,26 @@ export interface DeliveryLocation {
 
 export interface Pickup {
   _id: string;
-
-  // Order Information
   orderId: string;
   orderNumber: string;
   customerId: string;
   customerName: string;
   customerPhone: string;
-
-  // Driver Assignment
   driverId: string;
   driverName: string;
   driverPhone: string;
   vehicleType: string;
   vehiclePlateNumber: string;
-
-  // Locations
   pickupLocation: PickupLocation;
   deliveryLocation: DeliveryLocation;
-  distance?: number; // in km
-
-  // Timing
+  distance?: number;
   scheduledPickupTime?: string;
   actualPickupTime?: string;
   estimatedDeliveryTime?: string;
   actualDeliveryTime?: string;
-  duration?: number; // in minutes
-
-  // Status & Progress
+  duration?: number;
   status: "pending" | "assigned" | "picked-up" | "in-transit" | "delivered" | "cancelled" | "failed";
   priority: "low" | "normal" | "high" | "urgent";
-
-  // Package Details
   items: Array<{
     productId: string;
     productName: string;
@@ -205,8 +186,6 @@ export interface Pickup {
   }>;
   totalAmount: number;
   paymentStatus: "pending" | "paid" | "cod";
-
-  // Tracking
   currentLocation?: {
     lat: number;
     lng: number;
@@ -218,8 +197,6 @@ export interface Pickup {
     timestamp: string;
     note?: string;
   }>;
-
-  // Delivery Details
   deliveryInstructions?: string;
   proofOfDelivery?: {
     signature?: string;
@@ -227,12 +204,8 @@ export interface Pickup {
     recipientName?: string;
     timestamp?: string;
   };
-
-  // Ratings
   rating?: number;
   feedback?: string;
-
-  // Timestamps
   createdAt: string;
   updatedAt: string;
 }
@@ -258,10 +231,21 @@ export interface DriverPickupStats {
   totalEarnings: number;
 }
 
-// API Endpoints
 export const driverApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // ============ DRIVERS CRUD ============
+    // Get available drivers for assignment
+    getAvailableDrivers: builder.query<
+      BaseResponse<{ drivers: AvailableDriver[]; total: number }>,
+      { region?: string; search?: string } | void
+    >({
+      query: (params) => ({
+        url: "/drivers/available",
+        method: "GET",
+        params: params || undefined,
+      }),
+      providesTags: [{ type: "Drivers", id: "AVAILABLE" }],
+    }),
+
     getAllDrivers: builder.query<
       BaseResponse<AllDriversResponse>,
       {
@@ -318,7 +302,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: ["Drivers", "DriverActivityLogs"],
     }),
 
-    // ============ ACCOUNT ACTIONS ============
     suspendDriver: builder.mutation<BaseResponse, { id: string; data: SuspendDriverInput }>({
       query: ({ id, data }) => ({
         url: `/drivers/${id}/suspend`,
@@ -353,7 +336,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, id) => [{ type: "Drivers", id }, "Drivers", "DriverActivityLogs"],
     }),
 
-    // ============ PASSWORD SETUP ============
     resendPasswordSetupLink: builder.mutation<BaseResponse, string>({
       query: (id) => ({
         url: `/drivers/${id}/resend-password-link`,
@@ -362,7 +344,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, id) => [{ type: "Drivers", id }, "DriverActivityLogs"],
     }),
 
-    // ============ VERIFICATION ============
     verifyDriver: builder.mutation<BaseResponse, { id: string; notes?: string }>({
       query: ({ id, notes }) => ({
         url: `/drivers/${id}/verify`,
@@ -381,7 +362,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: (result, error, { id }) => [{ type: "Drivers", id }, "Drivers", "DriverActivityLogs"],
     }),
 
-    // ============ ACTIVITY LOGS ============
     getDriverActivityLogs: builder.query<
       BaseResponse<{ logs: DriverActivityLog[]; pagination: any }>,
       { driverId?: string; action?: string; page?: number; limit?: number }
@@ -402,7 +382,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, driverId) => [{ type: "DriverActivityLogs", id: driverId }],
     }),
 
-    // ============ BULK OPERATIONS ============
     bulkSuspendDrivers: builder.mutation<BaseResponse, { ids: string[]; reason: string; notifyUser: boolean }>({
       query: (data) => ({
         url: "/drivers/bulk/suspend",
@@ -421,7 +400,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: ["Drivers", "DriverActivityLogs"],
     }),
 
-    // ============ EXPORT ============
     exportDrivers: builder.mutation<Blob, { format: "csv" | "excel"; filters?: any }>({
       query: ({ format, filters }) => ({
         url: `/drivers/export/${format}`,
@@ -433,12 +411,7 @@ export const driverApi = baseApi.injectEndpoints({
 
     getDriverPickups: builder.query<
       BaseResponse<Pickup[]>,
-      {
-        driverId: string;
-        status?: string;
-        page?: number;
-        limit?: number;
-      }
+      { driverId: string; status?: string; page?: number; limit?: number }
     >({
       query: ({ driverId, ...params }) => ({
         url: `/drivers/${driverId}/pickups`,
@@ -448,7 +421,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, { driverId }) => [{ type: "DriverPickups", id: driverId }],
     }),
 
-    // Get ongoing pickups for driver
     getDriverOngoingPickups: builder.query<BaseResponse<Pickup[]>, string>({
       query: (driverId) => ({
         url: `/drivers/${driverId}/pickups/ongoing`,
@@ -457,7 +429,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, driverId) => [{ type: "DriverPickups", id: `${driverId}-ongoing` }],
     }),
 
-    // Get pickup history for driver
     getDriverPickupHistory: builder.query<
       BaseResponse<DriverPickupsResponse>,
       { driverId: string; page?: number; limit?: number }
@@ -470,7 +441,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, { driverId }) => [{ type: "DriverPickups", id: `${driverId}-history` }],
     }),
 
-    // Get driver pickup statistics
     getDriverPickupStats: builder.query<BaseResponse<DriverPickupStats>, string>({
       query: (driverId) => ({
         url: `/drivers/${driverId}/pickups/stats`,
@@ -479,7 +449,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, driverId) => [{ type: "DriverPickups", id: `${driverId}-stats` }],
     }),
 
-    // Get single pickup details
     getPickupById: builder.query<BaseResponse<Pickup>, string>({
       query: (pickupId) => ({
         url: `/pickups/${pickupId}`,
@@ -488,7 +457,6 @@ export const driverApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "Pickups", id }],
     }),
 
-    // Reassign pickup to different driver
     reassignPickup: builder.mutation<BaseResponse<Pickup>, { pickupId: string; newDriverId: string; reason?: string }>({
       query: ({ pickupId, newDriverId, reason }) => ({
         url: `/pickups/${pickupId}/reassign`,
@@ -498,7 +466,6 @@ export const driverApi = baseApi.injectEndpoints({
       invalidatesTags: ["DriverPickups", "Pickups"],
     }),
 
-    // Cancel pickup
     cancelPickup: builder.mutation<BaseResponse, { pickupId: string; reason: string }>({
       query: ({ pickupId, reason }) => ({
         url: `/pickups/${pickupId}/cancel`,
@@ -511,38 +478,24 @@ export const driverApi = baseApi.injectEndpoints({
 });
 
 export const {
-  // Drivers CRUD
+  useGetAvailableDriversQuery,
   useGetAllDriversQuery,
   useGetDriverByIdQuery,
   useCreateDriverMutation,
   useUpdateDriverMutation,
   useDeleteDriverMutation,
-
-  // Account Actions
   useSuspendDriverMutation,
   useUnsuspendDriverMutation,
   useDisableDriverMutation,
   useEnableDriverMutation,
-
-  // Password Setup
   useResendPasswordSetupLinkMutation,
-
-  // Verification
   useVerifyDriverMutation,
   useRejectDriverMutation,
-
-  // Activity Logs
   useGetDriverActivityLogsQuery,
   useGetDriverActivityLogsByIdQuery,
-
-  // Bulk Operations
   useBulkSuspendDriversMutation,
   useBulkDeleteDriversMutation,
-
-  // Export
   useExportDriversMutation,
-
-  // pickup
   useGetDriverPickupsQuery,
   useGetDriverOngoingPickupsQuery,
   useGetDriverPickupHistoryQuery,

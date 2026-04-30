@@ -9,18 +9,21 @@ import {
   TransferOrderInput,
 } from "@/types/order";
 
+export interface AssignDriverInput {
+  driverId: string;
+  distanceKm?: number;
+  isPriority?: boolean;
+  pickupAddress?: string;
+}
+
 export const orderApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /admin/orders — paginated list + stats
     getAllOrders: builder.query<OrdersListResponse, GetOrdersParams | undefined>({
       query: (params) => ({
         url: "/admin/orders",
         method: "GET",
         params: params || undefined,
       }),
-      //   providesTags: [{ type: "Orders", id: "LIST" }],
-      // }),
-
       providesTags: (result) =>
         result
           ? [
@@ -30,7 +33,6 @@ export const orderApi = baseApi.injectEndpoints({
           : [{ type: "Orders", id: "LIST" }],
     }),
 
-    // GET /admin/orders/:orderNumber — single order detail
     getOrderById: builder.query<BaseResponse<Order>, string>({
       query: (orderNumber) => ({
         url: `/admin/orders/${orderNumber}`,
@@ -39,7 +41,6 @@ export const orderApi = baseApi.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "Orders", id }],
     }),
 
-    // PATCH /admin/orders/:orderNumber/status
     updateOrderStatus: builder.mutation<BaseResponse<Order>, { orderNumber: string; data: UpdateOrderStatusInput }>({
       query: ({ orderNumber, data }) => ({
         url: `/admin/orders/${orderNumber}/status`,
@@ -52,7 +53,6 @@ export const orderApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // PATCH /admin/orders/:orderNumber/transfer
     transferOrder: builder.mutation<BaseResponse<Order>, { orderNumber: string; data: TransferOrderInput }>({
       query: ({ orderNumber, data }) => ({
         url: `/admin/orders/${orderNumber}/transfer`,
@@ -65,11 +65,25 @@ export const orderApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // PATCH /admin/orders/:orderNumber/cancel
     cancelOrder: builder.mutation<BaseResponse, { orderNumber: string; data: CancelOrderInput }>({
       query: ({ orderNumber, data }) => ({
         url: `/admin/orders/${orderNumber}/cancel`,
         method: "PATCH",
+        data,
+      }),
+      invalidatesTags: (result, error, { orderNumber }) => [
+        { type: "Orders", id: orderNumber },
+        { type: "Orders", id: "LIST" },
+      ],
+    }),
+
+    assignDriverToOrder: builder.mutation<
+      BaseResponse<{ delivery: any; driver: any; orderStatus: string }>,
+      { orderNumber: string; data: AssignDriverInput }
+    >({
+      query: ({ orderNumber, data }) => ({
+        url: `/admin/orders/${orderNumber}/assign-driver`,
+        method: "POST",
         data,
       }),
       invalidatesTags: (result, error, { orderNumber }) => [
@@ -86,4 +100,5 @@ export const {
   useCancelOrderMutation,
   useUpdateOrderStatusMutation,
   useTransferOrderMutation,
+  useAssignDriverToOrderMutation,
 } = orderApi;
