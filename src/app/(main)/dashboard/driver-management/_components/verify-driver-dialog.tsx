@@ -97,7 +97,7 @@ export default function VerifyDriverDialog({ open, onOpenChange, driver }: Verif
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Region</p>
-                  <p className="font-medium">{driver.region}</p>
+                  <p className="font-medium">{driver.region.name}</p>
                 </div>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function VerifyDriverDialog({ open, onOpenChange, driver }: Verif
                   <p className="text-muted-foreground text-sm">Driver&apos;sLicense</p>
                   <img
                     src={driver.driversLicense}
-                    alt="Driver&apos;sLicense"
+                    alt="Driver'sLicense"
                     className="h-48 w-full max-w-md rounded-lg border object-contain"
                   />
                   {driver.licenseNumber && (

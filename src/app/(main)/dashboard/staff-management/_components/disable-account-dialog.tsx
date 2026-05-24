@@ -57,8 +57,8 @@ export default function DisableAccountDialog({ open, onOpenChange, staff }: Disa
         <DialogHeader>
           <DialogTitle>Disable Account</DialogTitle>
           <DialogDescription>
-            You&apos;re about to disable {staff.fullName}&apos;saccount. This will permanently revoke their access and deactivate
-            all linked sessions.
+            You&apos;re about to disable {staff.fullName}&apos;saccount. This will permanently revoke their access and
+            deactivate all linked sessions.
           </DialogDescription>
         </DialogHeader>
 

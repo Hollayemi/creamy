@@ -9,15 +9,54 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useCreateDriverMutation } from "@/stores/services/driverApi";
+import { useCreateDriverMutation, useUpdateDriverMutation } from "@/stores/services/driverApi";
+import { useGetRegionsQuery } from "@/stores/services/config";
+import { CategoriesRegionResponse } from "@/types/config";
+
+interface Driver {
+  _id?: string;
+  userId?: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  fullName?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  vehicleType?: string;
+  vehicleModel?: string;
+  vehiclePlateNumber?: string;
+  vehicleColor?: string;
+  licenseNumber?: string;
+  licenseExpiry?: string;
+  region?: string | { _id: string; name: string };
+  assignedBranch?: string;
+  employmentType?: string;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  profilePhoto?: string;
+  vehiclePhoto?: string;
+  driversLicense?: string;
+}
 
 interface CreateDriverDialogProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open?: boolean) => void;
+  driver?: Driver | null;
 }
 
-export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverDialogProps) {
+export default function CreateDriverDialog({ open, onOpenChange, driver }: CreateDriverDialogProps) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const { data: defaultRegions, isLoading: regionLoading } = useGetRegionsQuery({});
+  const availableRegions: CategoriesRegionResponse[] = Array.isArray(defaultRegions?.data) ? defaultRegions.data : [];
+  
   const [formData, setFormData] = useState({
     // Basic Information
     fullName: "",
@@ -28,7 +67,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
     state: "",
 
     // Vehicle Information
-    vehicleType: "" as "motorcycle" | "bicycle" | "car" | "van" | "truck" | "",
+    vehicleType: "",
     vehicleModel: "",
     vehiclePlateNumber: "",
     vehicleColor: "",
@@ -40,7 +79,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
     // Work Information
     region: "",
     assignedBranch: "",
-    employmentType: "" as "full-time" | "part-time" | "contract" | "",
+    employmentType: "",
 
     // Emergency Contact
     emergencyContactName: "",
@@ -55,7 +94,48 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
   const [driversLicense, setDriversLicense] = useState<File | null>(null);
   const [driversLicensePreview, setDriversLicensePreview] = useState<string | null>(null);
 
-  const [createDriver, { isLoading }] = useCreateDriverMutation();
+  const [createDriver, { isLoading: isCreating }] = useCreateDriverMutation();
+  const [updateDriver, { isLoading: isUpdating }] = useUpdateDriverMutation();
+
+  const isLoading = isCreating || isUpdating;
+  const isEditMode = !!driver?._id;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (driver && open) {
+      const regionId = typeof driver.region === 'object' && driver.region?._id 
+        ? driver.region._id 
+        : typeof driver.region === 'string' 
+          ? driver.region 
+          : "";
+
+      setFormData({
+        fullName: driver.fullName || driver.name || driver.userId?.name || "",
+        email: driver.email || driver.userId?.email || "",
+        phone: driver.phone || "",
+        address: driver.address || "",
+        city: driver.city || "",
+        state: driver.state || "",
+        vehicleType: driver.vehicleType || "",
+        vehicleModel: driver.vehicleModel || "",
+        vehiclePlateNumber: driver.vehiclePlateNumber || "",
+        vehicleColor: driver.vehicleColor || "",
+        licenseNumber: driver.licenseNumber || "",
+        licenseExpiry: driver.licenseExpiry ? new Date(driver.licenseExpiry).toISOString().split('T')[0] : "",
+        region: regionId,
+        assignedBranch: driver.assignedBranch || "",
+        employmentType: driver.employmentType || "",
+        emergencyContactName: driver.emergencyContact?.name || "",
+        emergencyContactPhone: driver.emergencyContact?.phone || "",
+        emergencyContactRelationship: driver.emergencyContact?.relationship || "",
+      });
+
+      // Set existing image previews
+      if (driver.profilePhoto) setProfilePhotoPreview(driver.profilePhoto);
+      if (driver.vehiclePhoto) setVehiclePhotoPreview(driver.vehiclePhoto);
+      if (driver.driversLicense) setDriversLicensePreview(driver.driversLicense);
+    }
+  }, [driver, open]);
 
   useEffect(() => {
     if (!open) {
@@ -109,8 +189,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
       if (type === "profile") {
         setProfilePhoto(file);
         setProfilePhotoPreview(reader.result as string);
-      }
-      else if(type ==="vehicle"){
+      } else if (type === "vehicle") {
         setVehiclePhoto(file);
         setVehiclePhotoPreview(reader.result as string);
       } else {
@@ -125,7 +204,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
     if (type === "profile") {
       setProfilePhoto(null);
       setProfilePhotoPreview(null);
-    } else if(type === "vehicle"){
+    } else if (type === "vehicle") {
       setVehiclePhoto(null);
       setVehiclePhotoPreview(null);
     } else {
@@ -197,6 +276,11 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
     try {
       const submitFormData = new FormData();
 
+      // If updating, add driver ID
+      if (isEditMode && driver?._id) {
+        submitFormData.append("driverId", driver._id);
+      }
+
       // Basic Information
       submitFormData.append("fullName", formData.fullName.trim());
       submitFormData.append("email", formData.email.trim());
@@ -237,7 +321,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
         submitFormData.append("emergencyContactRelationship", formData.emergencyContactRelationship.trim());
       }
 
-      // Files
+      // Files - Only append if new files are selected (for updates)
       if (profilePhoto) {
         submitFormData.append("profilePhoto", profilePhoto);
       }
@@ -248,13 +332,24 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
         submitFormData.append("driversLicense", driversLicense);
       }
 
-      await createDriver(submitFormData).unwrap();
-      toast.success("Driver onboarded successfully.");
-      onOpenChange(false);
+      if (isEditMode  && driver?._id) {
+        await updateDriver({id: driver?._id, formData:submitFormData}).unwrap();
+        toast.success("Driver updated successfully.");
+      } else {
+        await createDriver(submitFormData).unwrap();
+        toast.success("Driver onboarded successfully.");
+      }
+      onOpenChange();
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to onboard driver");
+      toast.error(error?.data?.message || `Failed to ${isEditMode ? 'update' : 'onboard'} driver`);
     }
   };
+
+  const dialogTitle = isEditMode ? "Update Driver" : "Onboard New Driver";
+  const submitButtonText = isLoading 
+    ? (isEditMode ? "Updating..." : "Onboarding...") 
+    : (isEditMode ? "Update Driver" : "Complete Onboarding");
+  const stepDescription = isEditMode ? `Step ${step} of 3` : `Step ${step} of 3`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -267,9 +362,9 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
               </Button>
             )}
             <div>
-              <DialogTitle>Onboard New Driver - Step {step} of 3</DialogTitle>
+              <DialogTitle>{dialogTitle} - {stepDescription}</DialogTitle>
               <DialogDescription>
-                {step === 1 && "Enter driver&apos;spersonal information"}
+                {step === 1 && "Enter driver's personal information"}
                 {step === 2 && "Enter vehicle and license details"}
                 {step === 3 && "Work assignment and emergency contact"}
               </DialogDescription>
@@ -303,8 +398,11 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="driver@example.com"
+                      disabled={isEditMode}
                     />
-                    {/* <p className="text-muted-foreground text-xs">Password setup link will be sent here</p> */}
+                    {isEditMode && (
+                      <p className="text-xs text-muted-foreground">Email cannot be changed after creation</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -398,7 +496,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                     <Label htmlFor="vehicleType">Vehicle Type *</Label>
                     <Select
                       value={formData.vehicleType}
-                      onValueChange={(value: any) => setFormData({ ...formData, vehicleType: value })}
+                      onValueChange={(value) => setFormData({ ...formData, vehicleType: value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select vehicle type" />
@@ -446,7 +544,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Driver&apos;sLicense</h3>
+                <h3 className="text-lg font-semibold">Driver's License</h3>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -491,7 +589,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                     ) : (
                       <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:bg-gray-50">
                         <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                        <span className="text-sm text-gray-500">Upload driver&apos;slicense</span>
+                        <span className="text-sm text-gray-500">Upload driver's license</span>
                         <input
                           type="file"
                           className="hidden"
@@ -502,7 +600,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                     )}
                   </div>
 
-                   <div className="col-span-2 space-y-2">
+                  <div className="col-span-2 space-y-2">
                     <Label>Vehicle Photo</Label>
                     {vehiclePhotoPreview ? (
                       <div className="relative h-48 w-full">
@@ -524,7 +622,7 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                     ) : (
                       <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed hover:bg-gray-50">
                         <Upload className="mb-2 h-8 w-8 text-gray-400" />
-                        <span className="text-sm text-gray-500">Upload driver&apos;slicense</span>
+                        <span className="text-sm text-gray-500">Upload vehicle photo</span>
                         <input
                           type="file"
                           className="hidden"
@@ -555,29 +653,25 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="region">Region *</Label>
-                    <Input
-                      id="region"
-                      value={formData.region}
-                      onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                      placeholder="e.g., Lagos Mainland"
-                    />
+                    <Select value={formData.region} onValueChange={(e) => setFormData({ ...formData, region: e })}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select region" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableRegions.map((e, i) => (
+                          <SelectItem key={i} value={e.id || ""}>
+                            {e.displayName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="assignedBranch">Assigned Branch</Label>
-                    <Input
-                      id="assignedBranch"
-                      value={formData.assignedBranch}
-                      onChange={(e) => setFormData({ ...formData, assignedBranch: e.target.value })}
-                      placeholder="e.g., Ikeja Hub"
-                    />
-                  </div>
-
-                  <div className="col-span-2 space-y-2">
                     <Label htmlFor="employmentType">Employment Type *</Label>
                     <Select
                       value={formData.employmentType}
-                      onValueChange={(value: any) => setFormData({ ...formData, employmentType: value })}
+                      onValueChange={(value) => setFormData({ ...formData, employmentType: value })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select employment type" />
@@ -629,20 +723,12 @@ export default function CreateDriverDialog({ open, onOpenChange }: CreateDriverD
                 </div>
               </div>
 
-              {/* <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                <p className="text-sm text-blue-800">
-                  <strong>Note:</strong> After registration, a password setup link will be sent to{" "}
-                  <strong>{formData.email || "the driver&apos;semail"}</strong>. The driver must set their password before
-                  they can access the system.
-                </p>
-              </div> */}
-
               <div className="flex justify-end gap-2 border-t pt-4">
                 <Button variant="outline" onClick={handleBack}>
                   Back
                 </Button>
                 <Button onClick={handleSubmit} disabled={isLoading}>
-                  {isLoading ? "Onboarding..." : "Complete Onboarding"}
+                  {submitButtonText}
                 </Button>
               </div>
             </div>

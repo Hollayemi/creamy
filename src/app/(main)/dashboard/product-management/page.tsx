@@ -23,17 +23,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { useDeleteProductMutation, useGetProductsQuery } from "@/stores/services/productApi";
+import { useDeleteProductMutation, useGetProductsQuery, useGetProductStatsQuery } from "@/stores/services/productApi";
 import ProductImportExportDialog from "./_components/product-import-export-dialog";
-
-// Stats data
-const stats = [
-  { label: "Total Products", value: "4265", change: "1.7% vs last month", changeType: "increase", color: "purple" },
-  { label: "In Stock", value: "4141", change: "1.2% vs last month", changeType: "increase", color: "orange" },
-  { label: "Low Stock", value: "85", change: "4.5% vs last month", changeType: "increase", color: "cyan" },
-  { label: "Out of Stock", value: "124", change: "24% vs last month", changeType: "increase", color: "red" },
-  { label: "Categories", value: "12", change: "- vs last month", changeType: "neutral", color: "blue" },
-];
 
 export default function ProductsListPage() {
   const router = useRouter();
@@ -48,8 +39,21 @@ export default function ProductsListPage() {
 
   const [handleDelete, { isLoading: deleting }] = useDeleteProductMutation();
   const { data, isLoading } = useGetProductsQuery({ page: currentPage, status: selectedStatus, search: searchQuery });
-
+  const {data:statsRaw} = useGetProductStatsQuery();
   const products = data?.data?.products || [];
+  const stats = statsRaw?.data || {};
+
+  const { totalProducts={}, inStock={}, outOfStock={}, lowStock={}, categories={} } = stats
+
+  console.log(stats)
+
+  const statsData = [
+  { label: "Total Products", value: totalProducts?.value || 0, change: totalProducts.change, changeType: "increase", color: "purple" },
+  { label: "In Stock", value: inStock?.value || 0, change: inStock.change, changeType: "increase", color: "orange" },
+  { label: "Low Stock", value: lowStock?.value || 0, change: lowStock.change, changeType: "increase", color: "cyan" },
+  { label: "Out of Stock", value: outOfStock?.value || 0, change: outOfStock.change, changeType: "increase", color: "red" },
+  { label: "Categories", value: categories?.value || 0, change: categories.change, changeType: "neutral", color: "blue" },
+];
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { bg: string; text: string }> = {
@@ -113,7 +117,7 @@ export default function ProductsListPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((stat, index) => (
+        {statsData.map((stat, index) => (
           <div key={index} className="bg-muted text-muted-foreground rounded-lg border p-4">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -212,7 +216,7 @@ export default function ProductsListPage() {
               ))
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-muted-foreground h-24 text-center">
                   No products found.
                 </TableCell>
               </TableRow>

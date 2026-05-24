@@ -7,12 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu,  DropdownMenuContent,  DropdownMenuItem,  DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,7 +24,6 @@ const ProductPreviewPage = ({ searchParams }: any) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState("7");
 
-  // Fetch product preview data
   const { data, isLoading, isError, error } = useGetProductPreviewQuery(productId, {
     skip: !productId,
   });
@@ -171,7 +165,7 @@ const ProductPreviewPage = ({ searchParams }: any) => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => router.push(`/dashboard/product-management/${productId}/edit`)}>
+                  <DropdownMenuItem onClick={() => router.push(`/dashboard/product-management/edit?id=${productId}`)}>
                     Edit Product
                   </DropdownMenuItem>
                   <DropdownMenuItem>View History</DropdownMenuItem>
@@ -180,7 +174,7 @@ const ProductPreviewPage = ({ searchParams }: any) => {
               </DropdownMenu>
             </div>
           </div>
-          <div className="mt-2 flex items-center gap-1 md:justify-end">
+          <div className="mt-2 hidden flex items-center gap-1 md:justify-end">
             <h4 className="mr-3">
               Product <b>{productId}</b>
             </h4>

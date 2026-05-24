@@ -28,6 +28,13 @@ export const productApi = baseApi.injectEndpoints({
           : [{ type: "Products", id: "LIST" }],
     }),
 
+    getProductStats: builder.query<BaseResponse<any>, void>({
+      query: () => ({
+        url: "/product/overview/stats",
+        method: "GET",
+      }),
+    }),
+
     // GET /product/:id - Get single product by ID
     getProduct: builder.query<BaseResponse<Product>, string>({
       query: (id) => ({
@@ -100,7 +107,7 @@ export const productApi = baseApi.injectEndpoints({
       ],
     }),
 
-    // ── CSV Import / Export ────────────────────────────────────────────────────
+    //  CSV Import / Export 
 
     // GET /product/import/template — download blank CSV template
     downloadImportTemplate: builder.mutation<void, void>({
@@ -138,6 +145,7 @@ export const productApi = baseApi.injectEndpoints({
 export const {
   useGetProductsQuery,
   useGetProductQuery,
+  useGetProductStatsQuery,
   useCreateProductMutation,
   useGetProductPreviewQuery,
   useGetProductMovementHistoryQuery,

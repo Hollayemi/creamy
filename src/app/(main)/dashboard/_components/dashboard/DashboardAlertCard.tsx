@@ -14,7 +14,7 @@ export default function DashboardAlertCard() {
           <ArrowRight className="text-primary h-8 w-8" />
         </div>
 
-        <div className="flex items-center justify-between rounded-lg bg-amber-100 px-2 py-3 text-lg transition hover:bg-amber-200">
+        <div className="flex items-center justify-between rounded-lg bg-amber-500 px-2 py-3 text-lg transition hover:bg-amber-600">
           <span>You have 5 products that are out of stock...</span>
           <ArrowRight className="h-8 w-8 text-amber-600" />
         </div>

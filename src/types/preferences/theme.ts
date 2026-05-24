@@ -20,8 +20,8 @@ export const THEME_PRESET_OPTIONS = [
     label: "Default",
     value: "default",
     primary: {
-      light: "#5B2D90",
-      dark: "#5B2D90",
+      light: "#5b2d90",
+      dark: "#5b2d90",
     },
   },
   {

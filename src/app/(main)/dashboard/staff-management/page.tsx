@@ -329,6 +329,8 @@ export default function StaffManagementPage() {
             onOpenChange={setIsActivityLogsOpen}
             userId={selectedStaff._id}
             userName={selectedStaff.fullName}
+            avatar={selectedStaff.avatar}
+            joinedDate={selectedStaff.joinedDate}
           />
           <ResetPasswordDialog open={isResetPasswordOpen} onOpenChange={setIsResetPasswordOpen} staff={selectedStaff} />
           <SuspendAccountDialog

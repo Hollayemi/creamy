@@ -16,6 +16,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useUpdateDriverMutation, type Driver } from "@/stores/services/driverApi";
+import { useGetRegionsQuery } from "@/stores/services/config";
+import { CategoriesRegionResponse } from "@/types/config";
 
 interface EditDriverDialogProps {
   open: boolean;
@@ -24,6 +26,9 @@ interface EditDriverDialogProps {
 }
 
 export default function EditDriverDialog({ open, onOpenChange, driver }: EditDriverDialogProps) {
+  const { data: defaultRegions, isLoading: regionLoading } = useGetRegionsQuery({});
+  const availableRegions: CategoriesRegionResponse[] = Array.isArray(defaultRegions?.data) ? defaultRegions.data : [];
+
   const [formData, setFormData] = useState({
     fullName: driver.fullName,
     phone: driver.phone,
@@ -34,7 +39,7 @@ export default function EditDriverDialog({ open, onOpenChange, driver }: EditDri
     vehicleModel: driver.vehicleModel || "",
     vehiclePlateNumber: driver.vehiclePlateNumber,
     vehicleColor: driver.vehicleColor || "",
-    region: driver.region,
+    region: driver.region._id,
     assignedBranch: driver.assignedBranch || "",
     employmentType: driver.employmentType,
     emergencyContactName: driver.emergencyContact?.name || "",
@@ -56,7 +61,7 @@ export default function EditDriverDialog({ open, onOpenChange, driver }: EditDri
         vehicleModel: driver.vehicleModel || "",
         vehiclePlateNumber: driver.vehiclePlateNumber,
         vehicleColor: driver.vehicleColor || "",
-        region: driver.region,
+        region: driver.region._id || "",
         assignedBranch: driver.assignedBranch || "",
         employmentType: driver.employmentType,
         emergencyContactName: driver.emergencyContact?.name || "",
@@ -232,12 +237,19 @@ export default function EditDriverDialog({ open, onOpenChange, driver }: EditDri
             <h3 className="text-lg font-semibold">Work Assignment</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="region">Region</Label>
-                <Input
-                  id="region"
-                  value={formData.region}
-                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                />
+                <Label htmlFor="category">Region *</Label>
+                <Select value={formData.region} onValueChange={(e) => setFormData({ ...formData, region: e })}>
+                  <SelectTrigger className="bg-muted h-9! w-full" id="category">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableRegions.map((e, i) => (
+                      <SelectItem key={i} value={e.id || ""}>
+                        {e.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

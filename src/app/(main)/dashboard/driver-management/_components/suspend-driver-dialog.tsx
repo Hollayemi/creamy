@@ -57,8 +57,8 @@ export default function SuspendAccountDialog({ open, onOpenChange, driver }: Sus
         <DialogHeader>
           <DialogTitle>Suspend Account</DialogTitle>
           <DialogDescription>
-            You&apos;re about to temporarily suspend {driver.fullName}&apos;saccount. This will temporarily block their access to
-            the system.
+            You&apos;re about to temporarily suspend {driver.fullName}&apos;saccount. This will temporarily block their
+            access to the system.
           </DialogDescription>
         </DialogHeader>
 

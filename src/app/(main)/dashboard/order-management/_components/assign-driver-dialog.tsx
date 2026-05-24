@@ -9,11 +9,13 @@ import { useGetAvailableDriversQuery } from "@/stores/services/driverApi";
 import { useAssignDriverToOrderMutation } from "@/stores/services/orderApi";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import type { Order } from "@/types/order";
 
 interface AssignDriverDialogProps {
   isOpen: boolean;
   onClose: () => void;
   orderNumber: string;
+  order: Order
   onSuccess?: () => void;
 }
 
@@ -35,13 +37,14 @@ const vehicleColors: Record<string, string> = {
 
 export default function AssignDriverDialog({
   isOpen,
+  order,
   onClose,
   orderNumber,
   onSuccess,
 }: AssignDriverDialogProps) {
   const [search, setSearch] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
-  const [distanceKm, setDistanceKm] = useState("3.5");
+  const [distanceKm, setDistanceKm] = useState(order?.distanceToCustomerKm?.toString() || "3.5");
   const [pickupAddress, setPickupAddress] = useState("");
   const [isPriority, setIsPriority] = useState(false);
 
@@ -281,7 +284,7 @@ export default function AssignDriverDialog({
                   <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
                       <MapPin className="h-3 w-3" />
-                      {selectedDriver.region}
+                      {selectedDriver.region.name}
                     </div>
                     <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
                       <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
@@ -301,7 +304,7 @@ export default function AssignDriverDialog({
                       Pickup Address
                     </label>
                     <Input
-                      placeholder={`${selectedDriver.region} Warehouse`}
+                      placeholder={`${selectedDriver.region.name} Warehouse`}
                       value={pickupAddress}
                       onChange={(e) => setPickupAddress(e.target.value)}
                       className="h-9 text-sm"
@@ -316,6 +319,7 @@ export default function AssignDriverDialog({
                       type="number"
                       min="0.1"
                       step="0.1"
+                      disabled={true}
                       value={distanceKm}
                       onChange={(e) => setDistanceKm(e.target.value)}
                       className="h-9 text-sm"

@@ -9,6 +9,7 @@ import {
   Package,
   ShoppingCart,
   Users,
+  DollarSign,
   Settings,
   Car,
   CreditCard,
@@ -124,11 +125,6 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
           title: "Products",
           url: "/dashboard/product-management",
           icon: Package,
-          subItems: [
-            { title: "All Products", url: "/dashboard/product-management" },
-            { title: "Add New Product", url: "/dashboard/product-management/create" },
-            { title: "Categories", url: "/dashboard/product-management/categories" },
-          ],
         },
         {
           title: "Orders",
@@ -144,6 +140,11 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
           title: "Promotions",
           url: "/dashboard/promotion",
           icon: Tag,
+        },
+        {
+          title: "Plans",
+          url: "/dashboard/plans",
+          icon: DollarSign,
         },
         {
           title: "Settings",
@@ -197,17 +198,29 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
       {/* Header */}
       <SidebarHeader className="border-b border-white/10 px-4 py-3">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <Image src={APP_CONFIG.icon} className="group-data-[collapsible=icon]:hidden w-20 h-10" alt="GO-KART" width={900} height={900} />
-          <Image src={APP_CONFIG.logo} className="hidden! group-data-[collapsible=icon]:block! w-16! h-6" alt="GO-KART" width={900} height={900} />
+          <Image
+            src={APP_CONFIG.icon}
+            className="h-10 w-20 group-data-[collapsible=icon]:hidden"
+            alt="GO-KART"
+            width={900}
+            height={900}
+          />
+          <Image
+            src={APP_CONFIG.logo}
+            className="hidden! h-6 w-16! group-data-[collapsible=icon]:block!"
+            alt="GO-KART"
+            width={900}
+            height={900}
+          />
         </Link>
       </SidebarHeader>
 
       {/* Content */}
-      <SidebarContent className="px-2 py-2">
+      <SidebarContent className="px-2 py-2 hide-sidebar 0overflow-hidden">
         {navGroups.map((group) => (
           <SidebarGroup key={group.label} className="py-1">
             {group.label && (
-              <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-white/30 px-2 mb-1">
+              <SidebarGroupLabel className="mb-1 px-2 text-[10px] tracking-widest text-white/30 uppercase">
                 {group.label}
               </SidebarGroupLabel>
             )}
@@ -220,12 +233,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
                 // Items with sub-menu
                 if (item.subItems && item.subItems.length > 0) {
                   return (
-                    <Collapsible
-                      key={item.title}
-                      open={isOpen}
-                      onOpenChange={() => toggleGroup(item.title)}
-                      asChild
-                    >
+                    <Collapsible key={item.title} open={isOpen} onOpenChange={() => toggleGroup(item.title)} asChild>
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
@@ -233,7 +241,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
                             className={cn(
                               "group/btn w-full justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
                               "text-white/60 hover:bg-white/8 hover:text-white",
-                              active && "bg-[#5b2d90]/30 text-white border border-[#5b2d90]/40",
+                              active && "border border-[#5b2d90]/40 bg-[#5b2d90]/30 text-white",
                             )}
                             tooltip={item.title}
                           >
@@ -255,7 +263,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
 
-                        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                        <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
                           <SidebarMenuSub className="mt-0.5 ml-4 border-l border-white/10 pl-3">
                             {item.subItems.map((sub) => {
                               const subActive = pathname === sub.url || pathname.startsWith(sub.url + "/");
@@ -267,7 +275,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
                                     className={cn(
                                       "rounded-md py-1.5 text-sm transition-all duration-150",
                                       "text-white/50 hover:bg-white/5 hover:text-white",
-                                      subActive && "bg-[#5b2d90]/20 text-white font-medium",
+                                      subActive && "bg-[#5b2d90]/20 font-medium text-white",
                                     )}
                                   >
                                     <Link href={sub.url}>
@@ -319,7 +327,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
                       className={cn(
                         "rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150",
                         "text-white/60 hover:bg-white/8 hover:text-white",
-                        active && "bg-[#5b2d90]/30 text-white border border-[#5b2d90]/40",
+                        active && "border border-[#5b2d90]/40 bg-[#5b2d90]/30 text-white",
                       )}
                       tooltip={item.title}
                     >
@@ -343,9 +351,7 @@ export function AppSidebar({ variant = "inset", collapsible = "icon" }: { varian
 
       {/* Footer */}
       <SidebarFooter className="border-t border-white/10 px-4 py-3">
-        <div className="text-[10px] text-white/20 text-center">
-          © {new Date().getFullYear()} GoKart Admin
-        </div>
+        <div className="text-center text-[10px] text-white/20">© {new Date().getFullYear()} GoKart Admin</div>
       </SidebarFooter>
     </Sidebar>
   );

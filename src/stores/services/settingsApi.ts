@@ -5,7 +5,7 @@ import { Product } from "@/types/product";
 // Types
 export interface Category {
   _id: string;
-  id?: string;
+  id: string;
   name: string;
   displayName: string;
   icon: string;

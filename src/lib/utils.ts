@@ -41,8 +41,6 @@ export function formatCurrency(
   return new Intl.NumberFormat(locale, formatOptions).format(amount);
 }
 
-
-
 export function formatDate(date: Date | string, options?: Intl.DateTimeFormatOptions) {
   const parsedDate = typeof date === "string" ? new Date(date) : date;
 

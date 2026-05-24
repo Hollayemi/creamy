@@ -20,9 +20,10 @@ export interface Order {
   customerPhone: string;
   deliveryAddress: string;
   region: string;
+  distanceToCustomerKm: any;
   totalAmount: number;
   items: number;
-  status: string; // orderStatus (formatted: Pending | Processing | En-Route | Delivered | Cancelled)
+  status: string;
   dateOrdered: string;
   deliveryDate: string;
   courierName: string;

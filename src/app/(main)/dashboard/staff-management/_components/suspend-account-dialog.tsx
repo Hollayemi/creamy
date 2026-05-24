@@ -57,8 +57,8 @@ export default function SuspendAccountDialog({ open, onOpenChange, staff }: Susp
         <DialogHeader>
           <DialogTitle>Suspend Account</DialogTitle>
           <DialogDescription>
-            You&apos;re about to temporarily suspend {staff.fullName}&apos;saccount. This will temporarily block their access to
-            the system.
+            You&apos;re about to temporarily suspend {staff.fullName}&apos;saccount. This will temporarily block their
+            access to the system.
           </DialogDescription>
         </DialogHeader>
 

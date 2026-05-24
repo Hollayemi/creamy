@@ -122,7 +122,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white dark:bg-gray-900 p-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white p-4 dark:bg-gray-900">
       {/* Animated background elements */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute top-1/4 -left-4 h-24 w-28 animate-pulse rounded-full bg-purple-500/30 blur-3xl" />
@@ -132,13 +132,13 @@ export default function LoginPage() {
 
       {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-2xl">
+        <div className="rounded-2xl bg-white p-8 shadow-2xl dark:bg-gray-800">
           {/* Logo/Header */}
           <div className="mb-8 text-center">
             <div className="mb-2 flex justify-center">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-800">
                 {/* <span className="text-2xl font-bold text-white">GK</span> */}
-                <Image src={APP_CONFIG.logo} width={1000} height={1000} alt="logo" className="w-10 h-10" />
+                <Image src={APP_CONFIG.logo} width={1000} height={1000} alt="logo" className="h-10 w-10" />
               </div>
             </div>
             <h1 className="text-2xl font-bold text-gray-50">
@@ -212,11 +212,7 @@ export default function LoginPage() {
                 </a>
               </div>
 
-              <Button
-                type="submit"
-                className="h-12 w-full bg-purple-600"
-                disabled={isLoading}
-              >
+              <Button type="submit" className="h-12 w-full bg-purple-600" disabled={isLoading}>
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>

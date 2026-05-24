@@ -91,7 +91,7 @@ export default function AddNewProductPage({ searchParams }: any) {
   const [productId, setProductId] = useState("");
   const [sku, setSku] = useState("");
   const [brand, setBrand] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<any>("");
   const [status, setStatus] = useState<"active" | "inactive" | "draft">("active");
   const [description, setDescription] = useState("");
   const [salesPrice, setSalesPrice] = useState("");
@@ -121,7 +121,7 @@ export default function AddNewProductPage({ searchParams }: any) {
     isLoading: isFetching,
     isError: fetchError,
   } = useGetProductQuery(mySearchParams?.id, {
-    skip: !mySearchParams?.id || showing !== "edit",
+    skip: !mySearchParams?.id || !["edit", "duplicate"].includes(showing),
   });
 
   // const categories = categories.ma
@@ -147,7 +147,7 @@ export default function AddNewProductPage({ searchParams }: any) {
       setProductId(fetched.productId);
       setDescription(fetched.description);
       setBrand(fetched.brand);
-      setCategory(fetched.category._id);
+      setCategory(fetched.category);
       setStatus(fetched.status);
       setStockQuantity(fetched.stockQuantity?.toString());
       setSku(fetched.sku);
@@ -181,7 +181,7 @@ export default function AddNewProductPage({ searchParams }: any) {
       if (fetched.regionalDistribution && fetched.regionalDistribution.length > 0) {
         setRegions(
           fetched.regionalDistribution.map((r: any) => ({
-            region: r.region,
+            region: r.region._id,
             mainProduct: r.mainProduct?.toString() || "0",
             variants:
               r.variants?.map((v: any) => ({
@@ -194,7 +194,8 @@ export default function AddNewProductPage({ searchParams }: any) {
     }
   }, [productData, fetchError, showing]);
 
-  // Cleanup effect for memory leaks
+  // console.log("Fetched product data:", productName, productId, description, brand, category, status, stockQuantity, sku, salesPrice, unitType, unitQuantity, stockAlert, tags, variants, regions);
+
   useEffect(() => {
     return () => {
       imagePreviews.forEach((url) => URL.revokeObjectURL(url));
@@ -439,6 +440,8 @@ export default function AddNewProductPage({ searchParams }: any) {
     );
   }
 
+  console.log(availableRegions, regions)
+
   return (
     <div className="flex min-h-screen flex-col">
       <div className="flex-1">
@@ -661,8 +664,8 @@ export default function AddNewProductPage({ searchParams }: any) {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {regions.map((tag) => (
-                      <Badge key={tag.region} variant="outline" className="gap-1">
+                    {regions.map((tag, i) => (
+                      <Badge key={i} variant="outline" className="gap-1">
                         {availableRegions.find((r) => r.id === tag.region)?.displayName || tag.region}
                         <button
                           onClick={() => setRegions((prev) => prev.filter((r) => r.region !== tag.region))}

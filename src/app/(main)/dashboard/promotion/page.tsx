@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Filter, Download, Calendar, ChevronLeft, ChevronRight, MoreVertical } from "lucide-react";
+import { Search, Filter, Download, Calendar, ChevronLeft, ChevronRight, MoreVertical, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { useGetCouponsQuery } from "@/stores/services/promotionApi";
+import Link from "next/link";
 
 // Mock data for promotions (only one row as requested)
 const promotions = [
@@ -80,6 +82,11 @@ export default function PromotionsListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
+  const { data } = useGetCouponsQuery({})
+
+  const promotions = data?.data?.coupons || []
+
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { bg: string; text: string; icon: string }> = {
       Running: { bg: "bg-green-100", text: "text-green-700", icon: "🟢" },
@@ -112,7 +119,7 @@ export default function PromotionsListPage() {
     if (selectedRows.length === promotions.length) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(promotions.map((p) => p.id));
+      setSelectedRows(promotions.map((p: any) => p._id));
     }
   };
 
@@ -127,6 +134,10 @@ export default function PromotionsListPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button onClick={(()=> router.push("/dashboard/promotion/add"))} className="h-9 gap-2">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Promo
+          </Button>
           <Button variant="outline" className="bg-muted text-muted-foreground h-9 gap-2">
             <Download className="h-4 w-4" />
             Export
@@ -220,11 +231,11 @@ export default function PromotionsListPage() {
           </TableHeader>
           <TableBody>
             {promotions.map((promo) => (
-              <TableRow key={promo.id} className="hover:bg-gray-50">
+              <TableRow key={promo._id} className="hover:bg-gray-50">
                 <TableCell>
                   <Checkbox
-                    checked={selectedRows.includes(promo.id)}
-                    onCheckedChange={() => toggleRowSelection(promo.id)}
+                    checked={selectedRows.includes(promo._id)}
+                    onCheckedChange={() => toggleRowSelection(promo._id)}
                   />
                 </TableCell>
                 <TableCell className="font-medium">{promo.promoName}</TableCell>
@@ -236,7 +247,7 @@ export default function PromotionsListPage() {
                 <TableCell className="text-sm">{promo.startDate}</TableCell>
                 <TableCell className="text-sm">{promo.endDate}</TableCell>
                 <TableCell>{getStatusBadge(promo.status)}</TableCell>
-                <TableCell>{promo.createdBy}</TableCell>
+                <TableCell>{promo?.createdBy?.name || ""}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>

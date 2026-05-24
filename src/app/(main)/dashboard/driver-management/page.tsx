@@ -56,7 +56,7 @@ export default function DriverManagementPage() {
   const [limit] = useState(10);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
+console.log({selectedDriver})
   // Dialog states
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -78,6 +78,11 @@ export default function DriverManagementPage() {
     page,
     limit,
   });
+
+  const closeCreateDialog = () => {
+    setSelectedDriver(null);
+    setIsCreateDialogOpen(false);
+  }
 
   const drivers = driversResponse?.data?.drivers || [];
   console.log({ drivers });
@@ -163,7 +168,7 @@ export default function DriverManagementPage() {
 
   const handleEdit = (driver: Driver) => {
     setSelectedDriver(driver);
-    setIsEditDialogOpen(true);
+    setIsCreateDialogOpen(true);
   };
 
   const handleResendPasswordLink = (driver: Driver) => {
@@ -208,7 +213,7 @@ export default function DriverManagementPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="@container/main space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -305,14 +310,14 @@ export default function DriverManagementPage() {
                         <AvatarFallback>{getInitials(driver.fullName)}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{driver.userId.name}</p>
+                        <p className="font-medium">{driver?.userId?.name}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <a href={`mailto:${driver.email}`} className="text-blue-600 hover:underline">
-                        {driver.email}
+                      <a href={`mailto:${driver?.userId?.email}`} className="text-blue-600 hover:underline">
+                        {driver?.userId?.email}
                       </a>
                       <p className="text-muted-foreground">{driver.phone}</p>
                     </div>
@@ -326,7 +331,7 @@ export default function DriverManagementPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{driver.region || "-"}</TableCell>
+                  <TableCell>{driver?.region?.name || "-"}</TableCell>
                   <TableCell>{getVerificationBadge(driver.verificationStatus)}</TableCell>
                   <TableCell>{format(new Date(driver.joinedDate), "dd MMM yyyy")}</TableCell>
                   <TableCell>{getStatusBadge(driver.status)}</TableCell>
@@ -362,13 +367,6 @@ export default function DriverManagementPage() {
                           <DropdownMenuItem onClick={() => handleVerify(driver)}>
                             <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
                             Verify Driver
-                          </DropdownMenuItem>
-                        )}
-
-                        {!driver.hasSetPassword && (
-                          <DropdownMenuItem onClick={() => handleResendPasswordLink(driver)}>
-                            <Mail className="mr-2 h-4 w-4" />
-                            Resend Password Link
                           </DropdownMenuItem>
                         )}
 
@@ -421,11 +419,11 @@ export default function DriverManagementPage() {
       </div>
 
       {/* Dialogs */}
-      <CreateDriverDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
+      <CreateDriverDialog open={isCreateDialogOpen} onOpenChange={closeCreateDialog} driver={selectedDriver} />
 
       {selectedDriver && (
         <>
-          <EditDriverDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} driver={selectedDriver} />
+          {/* <EditDriverDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} driver={selectedDriver} /> */}
           <DriverActivityLogsDrawer
             open={isActivityLogsOpen}
             onOpenChange={setIsActivityLogsOpen}

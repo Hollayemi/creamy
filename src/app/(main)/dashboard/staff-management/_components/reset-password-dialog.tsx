@@ -83,8 +83,8 @@ export default function ResetPasswordDialog({ open, onOpenChange, staff }: Reset
           <div className="space-y-6 py-4">
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
               <p className="text-sm text-yellow-800">
-                <strong>Warning:</strong> This will immediately invalidate the user&apos;scurrent password and generate a
-                new temporary password. The user will be required to change it on their next login.
+                <strong>Warning:</strong> This will immediately invalidate the user&apos;scurrent password and generate
+                a new temporary password. The user will be required to change it on their next login.
               </p>
             </div>
 

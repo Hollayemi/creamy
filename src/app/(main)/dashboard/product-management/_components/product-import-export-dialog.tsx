@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useImportProductsFromCsvMutation } from "@/stores/services/productApi";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+//  Helpers 
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://gokart-foht.onrender.com/api/v1";
 
@@ -43,7 +43,7 @@ async function downloadFile(url: string, filename: string) {
   URL.revokeObjectURL(objectUrl);
 }
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+//  Types 
 
 interface ImportResult {
   imported: number;
@@ -58,7 +58,7 @@ interface ProductImportExportDialogProps {
   exportParams?: Record<string, any>;
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+//  Component 
 
 export default function ProductImportExportDialog({
   open,
@@ -76,7 +76,7 @@ export default function ProductImportExportDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importProducts, { isLoading: importing }] = useImportProductsFromCsvMutation();
 
-  // ── Reset on close ────────────────────────────────────────────────────────
+  //  Reset on close 
   const handleClose = () => {
     setSelectedFile(null);
     setImportResult(null);
@@ -84,7 +84,7 @@ export default function ProductImportExportDialog({
     onOpenChange(false);
   };
 
-  // ── File selection ────────────────────────────────────────────────────────
+  //  File selection 
   const handleFileSelect = (file: File) => {
     if (!file.name.endsWith(".csv")) {
       toast.error("Only CSV files are accepted");
@@ -105,7 +105,7 @@ export default function ProductImportExportDialog({
     if (file) handleFileSelect(file);
   };
 
-  // ── Import ────────────────────────────────────────────────────────────────
+  //  Import 
   const handleImport = async () => {
     if (!selectedFile) return;
     const formData = new FormData();
@@ -126,7 +126,7 @@ export default function ProductImportExportDialog({
     }
   };
 
-  // ── Download template ─────────────────────────────────────────────────────
+  //  Download template 
   const handleDownloadTemplate = async () => {
     setTemplateLoading(true);
     try {
@@ -139,12 +139,13 @@ export default function ProductImportExportDialog({
     }
   };
 
-  // ── Export ────────────────────────────────────────────────────────────────
+  //  Export 
   const handleExport = async () => {
     setExportLoading(true);
     try {
       const params = exportParams
-        ? "?" + new URLSearchParams(Object.fromEntries(Object.entries(exportParams).filter(([, v]) => v != null))).toString()
+        ? "?" +
+          new URLSearchParams(Object.fromEntries(Object.entries(exportParams).filter(([, v]) => v != null))).toString()
         : "";
       await downloadFile(`/product/export${params}`, `products_export_${Date.now()}.csv`);
       toast.success("Products exported successfully");
@@ -155,7 +156,7 @@ export default function ProductImportExportDialog({
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // 
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -166,7 +167,7 @@ export default function ProductImportExportDialog({
         </DialogHeader>
 
         {/* Tabs */}
-        <div className="flex gap-1 rounded-lg bg-muted p-1">
+        <div className="bg-muted flex gap-1 rounded-lg p-1">
           {(["import", "export"] as const).map((tab) => (
             <button
               key={tab}
@@ -183,7 +184,7 @@ export default function ProductImportExportDialog({
           ))}
         </div>
 
-        {/* ── Import Tab ──────────────────────────────────────────────────── */}
+        {/*  Import Tab  */}
         {activeTab === "import" && (
           <div className="space-y-4">
             {/* Download template banner */}
@@ -225,20 +226,18 @@ export default function ProductImportExportDialog({
                     : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/40",
                 )}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Upload className="h-5 w-5 text-muted-foreground" />
+                <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-full">
+                  <Upload className="text-muted-foreground h-5 w-5" />
                 </div>
                 {selectedFile ? (
                   <div className="space-y-1">
-                    <p className="font-medium text-sm">{selectedFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {(selectedFile.size / 1024).toFixed(1)} KB
-                    </p>
+                    <p className="text-sm font-medium">{selectedFile.name}</p>
+                    <p className="text-muted-foreground text-xs">{(selectedFile.size / 1024).toFixed(1)} KB</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
                     <p className="text-sm font-medium">Drop your CSV file here</p>
-                    <p className="text-xs text-muted-foreground">or click to browse — max 10 MB</p>
+                    <p className="text-muted-foreground text-xs">or click to browse — max 10 MB</p>
                   </div>
                 )}
                 <input
@@ -257,10 +256,10 @@ export default function ProductImportExportDialog({
 
             {/* Import result */}
             {importResult && (
-              <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
+              <div className="bg-muted/30 space-y-3 rounded-lg border p-4">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  <span className="font-medium text-sm">Import complete</span>
+                  <span className="text-sm font-medium">Import complete</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-md bg-green-50 p-3 dark:bg-green-950/30">
@@ -310,11 +309,7 @@ export default function ProductImportExportDialog({
                     Clear
                   </Button>
                 )}
-                <Button
-                  className="flex-1 gap-2"
-                  disabled={!selectedFile || importing}
-                  onClick={handleImport}
-                >
+                <Button className="flex-1 gap-2" disabled={!selectedFile || importing} onClick={handleImport}>
                   {importing && <Loader2 className="h-4 w-4 animate-spin" />}
                   {importing ? "Importing…" : "Import Products"}
                 </Button>
@@ -323,40 +318,36 @@ export default function ProductImportExportDialog({
           </div>
         )}
 
-        {/* ── Export Tab ──────────────────────────────────────────────────── */}
+        {/*  Export Tab  */}
         {activeTab === "export" && (
           <div className="space-y-4">
-            <div className="rounded-lg border bg-muted/30 p-5 text-center space-y-3">
-              <div className="flex h-14 w-14 mx-auto items-center justify-center rounded-full bg-primary/10">
-                <Download className="h-6 w-6 text-primary" />
+            <div className="bg-muted/30 space-y-3 rounded-lg border p-5 text-center">
+              <div className="bg-primary/10 mx-auto flex h-14 w-14 items-center justify-center rounded-full">
+                <Download className="text-primary h-6 w-6" />
               </div>
               <div>
-                <p className="font-semibold text-sm">Export Product Catalogue</p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-sm font-semibold">Export Product Catalogue</p>
+                <p className="text-muted-foreground mt-1 text-xs">
                   Downloads all current products{exportParams?.search ? ` matching "${exportParams.search}"` : ""} as a
                   CSV file, including all active filters.
                 </p>
               </div>
             </div>
 
-            <div className="rounded-lg border border-dashed px-4 py-3 space-y-1.5">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">What's included</p>
+            <div className="space-y-1.5 rounded-lg border border-dashed px-4 py-3">
+              <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">What&#39s included</p>
               {["Product name, ID & SKU", "Category, price & stock", "Status & variants", "Regional distribution"].map(
                 (item) => (
                   <div key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                    <p className="text-sm text-muted-foreground">{item}</p>
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-green-500" />
+                    <p className="text-muted-foreground text-sm">{item}</p>
                   </div>
                 ),
               )}
             </div>
 
             <Button className="w-full gap-2" onClick={handleExport} disabled={exportLoading}>
-              {exportLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4" />
-              )}
+              {exportLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
               {exportLoading ? "Exporting…" : "Download CSV"}
             </Button>
           </div>

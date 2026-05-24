@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, Search, Filter, Download, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,10 +13,10 @@ import OrderDetailsDialog from "./_components/order-details-dialog";
 import { useGetAllOrdersQuery } from "@/stores/services/orderApi";
 import type { Order, GetOrdersParams } from "@/types/order";
 
-export default function OrdersListPage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+export default function OrdersListPage({ searchParams }: any) {
+  const { slug } = use(searchParams) as any
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<GetOrdersParams["status"]>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(9);
@@ -35,6 +34,8 @@ export default function OrdersListPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedStatus, startDate, endDate, region, minAmount, maxAmount]);
+
+  useEffect(() => setSearchQuery(slug), [slug])
 
   const { data, isLoading, isError, refetch } = useGetAllOrdersQuery({
     page: currentPage,
@@ -134,7 +135,7 @@ export default function OrdersListPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-2">
+    <div className="@container/main flex flex-col gap-6 p-2">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

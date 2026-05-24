@@ -146,6 +146,7 @@ export default function CategoriesTab() {
   };
 
   const handleDelete = async () => {
+    console.log("here", deletingCategoryId)
     if (!deletingCategoryId) return;
 
     try {
@@ -222,7 +223,7 @@ export default function CategoriesTab() {
                       <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(category)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category._id)}>
+                      <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category.id)}>
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
                     </div>
@@ -324,7 +325,7 @@ export default function CategoriesTab() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+            <AlertDialogAction onClick={() => handleDelete()} disabled={isDeleting}>
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>

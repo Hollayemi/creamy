@@ -29,6 +29,16 @@ export const baseApi = createApi({
     "Dashboard",
     "Orders",
     "List",
+    "PaymentMethods",
+    "Plans",
+    "Subscriptions",
+    "DashboardOverview",
+    "DashboardStats",
+    "RevenueChart",
+    "RecentOrders",
+    "TopProducts",
+    "TopCustomers",
+    "RegionalPerformance"
   ],
   endpoints: () => ({}),
 });

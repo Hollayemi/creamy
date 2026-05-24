@@ -2,6 +2,10 @@ import { baseApi } from "../baseApi";
 import type { BaseResponse } from "../api/types";
 import { CategoriesRegionResponse } from "@/types/config";
 
+export interface Region {
+    _id: string;
+    name: string;
+  }; 
 export interface AvailableDriver {
   _id: string;
   fullName: string;
@@ -11,7 +15,7 @@ export interface AvailableDriver {
   vehicleType: string;
   vehiclePlateNumber: string;
   vehicleModel?: string;
-  region: string;
+  region: Region;
   rating: number;
   totalDeliveries: number;
   completedDeliveries: number;
@@ -46,7 +50,7 @@ export interface Driver {
   licenseNumber?: string;
   licenseExpiry?: string;
   profilePhoto?: string;
-  region: string;
+  region: Region;
   assignedBranch?: string;
   employmentType: "full-time" | "part-time" | "contract";
   status: "active" | "suspended" | "disabled" | "pending" | "on-delivery";
@@ -423,7 +427,7 @@ export const driverApi = baseApi.injectEndpoints({
 
     getDriverOngoingPickups: builder.query<BaseResponse<Pickup[]>, string>({
       query: (driverId) => ({
-        url: `/drivers/${driverId}/pickups/ongoing`,
+        url: `/drivers/orders/active`,
         method: "GET",
       }),
       providesTags: (result, error, driverId) => [{ type: "DriverPickups", id: `${driverId}-ongoing` }],

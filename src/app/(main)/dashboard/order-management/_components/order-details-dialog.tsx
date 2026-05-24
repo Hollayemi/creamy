@@ -127,9 +127,7 @@ export default function OrderDetailsDialog({
                 <MoreVertical className="h-5 w-5 cursor-pointer text-gray-300 transition-colors hover:text-white" />
               </div>
               <h2 className="text-xl font-semibold text-white">{order.orderId}</h2>
-              <Badge className={cn("ml-3", currentStatusConfig.color)}>
-                {currentStatusConfig.label}
-              </Badge>
+              <Badge className={cn("ml-3", currentStatusConfig.color)}>{currentStatusConfig.label}</Badge>
             </div>
 
             <button onClick={onClose} className="text-white transition-colors hover:text-gray-300">
@@ -231,7 +229,7 @@ export default function OrderDetailsDialog({
                       <div className="w-1/3 pl-4">
                         <p className="text-sm text-gray-600 dark:text-gray-400">{activity.event}</p>
                         {activity.note && (
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{activity.note}</p>
+                          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">{activity.note}</p>
                         )}
                       </div>
                     </div>
@@ -262,7 +260,7 @@ export default function OrderDetailsDialog({
           </div>
 
           {/* Footer Actions */}
-          <div className="flex items-center gap-2 border-t bg-gray-50 w-full p-4 dark:bg-gray-800">
+          <div className="flex w-full items-center gap-2 border-t bg-gray-50 p-4 dark:bg-gray-800">
             {!isCancelled && (
               <>
                 {canAccept ? (
@@ -298,11 +296,7 @@ export default function OrderDetailsDialog({
             )}
 
             {isCancelled && (
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={onClose}
-              >
+              <Button variant="outline" className="w-full" onClick={onClose}>
                 Close
               </Button>
             )}
@@ -327,6 +321,7 @@ export default function OrderDetailsDialog({
 
       <AssignDriverDialog
         isOpen={isAssignDriverOpen}
+        order={order}
         onClose={() => setIsAssignDriverOpen(false)}
         orderNumber={order.orderId}
         onSuccess={onStatusUpdate}
